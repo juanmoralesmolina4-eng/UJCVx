@@ -1,0 +1,71 @@
+# ============================================================
+# Datos sensibles — NUNCA subir
+# ============================================================
+# Excels reales (programación, pagos) — datos de docentes
+*.xlsx
+*.xls
+*.csv
+
+# Audios de WhatsApp y transcripciones
+*.ogg
+*.mp3
+*.wav
+*.m4a
+transcripcion.txt
+
+# Propuesta y documentos con nombres propios
+Propuesta*.pdf
+propuesta.html
+
+# ============================================================
+# Reportes generados (es output, no fuente)
+# ============================================================
+Reporte_validacion.xlsx
+Programacion_normalizada.xlsx
+
+# ============================================================
+# Python
+# ============================================================
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ============================================================
+# Node / Next.js
+# ============================================================
+node_modules/
+.next/
+out/
+.vercel/
+.turbo/
+dist/
+build/
+
+# ============================================================
+# Variables de entorno (claves Supabase, etc.)
+# ============================================================
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# ============================================================
+# Editores y SO
+# ============================================================
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ============================================================
+# Claude / cache
+# ============================================================
+.claude/

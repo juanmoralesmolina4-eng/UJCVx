@@ -1,27 +1,31 @@
-"""Verifica que la hoja consolidada coincida con la suma de las hojas por carrera."""
-from openpyxl import load_workbook
+"""Verifica que la hoja consolidada coincida con la suma de las hojas por carrera.
 
-from modelo import Problema
-from cargar.programacion import CONSOLIDADAS_CONOCIDAS, _encontrar_fila_encabezado, _es_fila_vacia
+A diferencia de otras validaciones, esta opera sobre la lista cruda de clases
+incluyendo las que vienen de hojas consolidadas (cuando se solicita
+explícitamente desde main.py)."""
+from collections import Counter
+
+import config
+from modelo import Clase, Problema
 
 
-def validar_archivo(path) -> list[Problema]:
-    """Compara la cantidad de filas en cada hoja consolidada contra la suma
-    de las hojas no consolidadas. Reporta si no cuadran."""
-    wb = load_workbook(path, data_only=True, read_only=True)
-    nombres = list(wb.sheetnames)
+def validar(clases_todas: list[Clase]) -> list[Problema]:
+    """Compara filas en hojas consolidadas vs suma de hojas no consolidadas.
 
-    consolidadas_presentes = [h for h in nombres if h in CONSOLIDADAS_CONOCIDAS]
-    otras = [h for h in nombres if h not in CONSOLIDADAS_CONOCIDAS]
+    Espera recibir TODAS las clases del archivo (incluyendo las de hojas
+    consolidadas). Si no se cargaron las consolidadas, no encuentra nada
+    que reportar y devuelve lista vacía."""
+    conteo = Counter(c.hoja for c in clases_todas)
+    consolidadas = {h: n for h, n in conteo.items() if h in config.HOJAS_CONSOLIDADAS}
+    otras = {h: n for h, n in conteo.items() if h not in config.HOJAS_CONSOLIDADAS}
 
-    if not consolidadas_presentes or not otras:
+    if not consolidadas or not otras:
         return []
 
-    suma_otras = sum(_contar_filas_datos(wb[h]) for h in otras)
+    suma_otras = sum(otras.values())
 
     problemas: list[Problema] = []
-    for hoja_consol in consolidadas_presentes:
-        n_consol = _contar_filas_datos(wb[hoja_consol])
+    for hoja_consol, n_consol in consolidadas.items():
         if n_consol == suma_otras:
             continue
         problemas.append(Problema(
@@ -41,21 +45,3 @@ def validar_archivo(path) -> list[Problema]:
         ))
 
     return problemas
-
-
-def _contar_filas_datos(ws) -> int:
-    fila_encabezado = _encontrar_fila_encabezado(ws)
-    primera = fila_encabezado + 1
-    vacias = 0
-    n = 0
-    for i, row in enumerate(ws.iter_rows(values_only=True), 1):
-        if i < primera:
-            continue
-        if _es_fila_vacia(row):
-            vacias += 1
-            if vacias >= 3:
-                break
-            continue
-        vacias = 0
-        n += 1
-    return n

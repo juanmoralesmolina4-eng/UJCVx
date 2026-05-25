@@ -1,9 +1,7 @@
 from collections import defaultdict
 
+import config
 from modelo import Clase, Problema
-
-
-UMBRAL_BAJO_HORAS = 4
 
 
 def validar(clases: list[Clase]) -> list[Problema]:
@@ -22,7 +20,7 @@ def validar(clases: list[Clase]) -> list[Problema]:
 
     problemas: list[Problema] = []
     for cated, total in horas_por_cated.items():
-        if total >= UMBRAL_BAJO_HORAS:
+        if total >= config.UMBRAL_SUBUTILIZACION_H_SEMANA:
             continue
         problemas.append(Problema(
             tipo="subutilizacion_docente",

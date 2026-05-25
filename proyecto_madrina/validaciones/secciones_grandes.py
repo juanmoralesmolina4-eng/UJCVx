@@ -1,7 +1,5 @@
+import config
 from modelo import Clase, Problema
-
-
-UMBRAL_ALUMNOS = 30
 
 
 def validar(clases: list[Clase]) -> list[Problema]:
@@ -10,7 +8,7 @@ def validar(clases: list[Clase]) -> list[Problema]:
     problemas: list[Problema] = []
 
     for c in clases:
-        if c.alumnos is None or c.alumnos <= UMBRAL_ALUMNOS:
+        if c.alumnos is None or c.alumnos <= config.UMBRAL_SECCION_GRANDE:
             continue
         problemas.append(Problema(
             tipo="seccion_grande",

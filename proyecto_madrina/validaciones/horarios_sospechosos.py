@@ -1,18 +1,16 @@
+import config
 from modelo import Clase, Problema
 from normalizar import minutos_a_hhmm
 
 
-BLOQUE_MUY_LARGO_MIN = 5 * 60
-
-
 def validar(clases: list[Clase]) -> list[Problema]:
-    """Bloques continuos de más de 5 horas — probable error de captura
+    """Bloques continuos demasiado largos — probable error de captura
     (ej: '7:00 - 20:50' en vez de dos bloques separados)."""
     problemas: list[Problema] = []
 
     for c in clases:
         for b in c.bloques:
-            if b.duracion_min <= BLOQUE_MUY_LARGO_MIN:
+            if b.duracion_min <= config.UMBRAL_BLOQUE_LARGO_MIN:
                 continue
             problemas.append(Problema(
                 tipo="horario_sospechoso",

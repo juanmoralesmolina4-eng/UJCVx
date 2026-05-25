@@ -2,6 +2,7 @@ from pathlib import Path
 
 from openpyxl import load_workbook
 
+import config
 import normalizar
 from modelo import Clase, DIAS
 
@@ -17,18 +18,15 @@ def _es_fila_vacia(row) -> bool:
     return all(v is None or (isinstance(v, str) and not v.strip()) for v in row)
 
 
-def _encontrar_fila_encabezado(ws, max_buscar: int = 15) -> int:
+def _encontrar_fila_encabezado(ws) -> int:
     """Localiza la fila con los nombres de columna. Espera 'CATEDR' en algún lado."""
     for i, row in enumerate(ws.iter_rows(values_only=True), 1):
-        if i > max_buscar:
+        if i > config.MAX_FILAS_BUSCAR_ENCABEZADO:
             break
         for cell in row:
             if cell and isinstance(cell, str) and "CATEDR" in cell.upper():
                 return i
     return 7
-
-
-CONSOLIDADAS_CONOCIDAS = {"PREGRADO-IA"}
 
 
 def cargar_excel(
@@ -39,15 +37,15 @@ def cargar_excel(
     """Lee las hojas del Excel y devuelve una lista de Clase.
 
     Si `omitir_consolidadas` está activo, se saltan las hojas listadas en
-    `CONSOLIDADAS_CONOCIDAS` cuando hay otras hojas que cargar. La hoja
+    `config.HOJAS_CONSOLIDADAS` cuando hay otras hojas que cargar. La hoja
     consolidada repite el contenido de las hojas por carrera y dispara
-    260 falsos duplicados si se incluye."""
+    falsos duplicados si se incluye."""
     wb = load_workbook(path, data_only=True, read_only=True)
     clases: list[Clase] = []
 
     hojas_a_leer = list(wb.sheetnames)
     if omitir_consolidadas and len(hojas_a_leer) > 1:
-        hojas_a_leer = [h for h in hojas_a_leer if h not in CONSOLIDADAS_CONOCIDAS]
+        hojas_a_leer = [h for h in hojas_a_leer if h not in config.HOJAS_CONSOLIDADAS]
 
     for nombre_hoja in hojas_a_leer:
         ws = wb[nombre_hoja]
@@ -61,7 +59,7 @@ def cargar_excel(
 
             if _es_fila_vacia(row):
                 vacias_consecutivas += 1
-                if vacias_consecutivas >= 3:
+                if vacias_consecutivas >= config.LIMITE_FILAS_VACIAS_SEGUIDAS:
                     break
                 continue
             vacias_consecutivas = 0

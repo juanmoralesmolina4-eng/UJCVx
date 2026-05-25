@@ -1,9 +1,7 @@
 from collections import defaultdict
 
+import config
 from modelo import Clase, Problema
-
-
-UMBRAL_HORAS_SEMANALES = 40
 
 
 def validar(clases: list[Clase]) -> list[Problema]:
@@ -20,14 +18,14 @@ def validar(clases: list[Clase]) -> list[Problema]:
 
     problemas: list[Problema] = []
     for cated, total in horas_por_cated.items():
-        if total <= UMBRAL_HORAS_SEMANALES:
+        if total <= config.UMBRAL_SOBRECARGA_H_SEMANA:
             continue
         problemas.append(Problema(
             tipo="sobrecarga_docente",
             severidad="media",
             descripcion=(
                 f"{cated} acumula {total:.1f} h/semana entre todas sus clases "
-                f"(umbral: {UMBRAL_HORAS_SEMANALES} h)."
+                f"(umbral: {config.UMBRAL_SOBRECARGA_H_SEMANA} h)."
             ),
             referencias=refs_por_cated[cated],
             extra={"catedratico": cated, "horas_totales": round(total, 2)},

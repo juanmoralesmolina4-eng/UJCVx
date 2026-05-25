@@ -26,9 +26,10 @@ export default function Home() {
           <h2 className="text-xl font-semibold">Estado actual</h2>
           <ul className="mt-3 space-y-2 text-zinc-700 dark:text-zinc-300">
             <li>· Pipeline de validación en Python — funcionando.</li>
+            <li>· Generador de archivo de pago (formato RRHH) — funcionando.</li>
+            <li>· Métricas de eficiencia de aula y docente — funcionando.</li>
             <li>· Schema de base de datos multi-campus — diseñado.</li>
             <li>· Aplicación web — en construcción.</li>
-            <li>· Integración con Onlive — pendiente.</li>
           </ul>
         </section>
 

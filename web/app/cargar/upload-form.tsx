@@ -8,7 +8,13 @@ import { subirExcel } from "./actions";
 type Estado =
   | { kind: "idle" }
   | { kind: "subiendo"; nombre: string }
-  | { kind: "ok"; nombre: string; importacionId: string }
+  | {
+      kind: "ok";
+      nombre: string;
+      importacionId: string;
+      totalClases?: number;
+      totalProblemas?: number;
+    }
   | { kind: "error"; mensaje: string };
 
 export function UploadForm() {
@@ -39,6 +45,8 @@ export function UploadForm() {
           kind: "ok",
           nombre: archivo.name,
           importacionId: r.importacionId,
+          totalClases: r.totalClases,
+          totalProblemas: r.totalProblemas,
         });
         router.refresh();
       } else {
@@ -97,7 +105,10 @@ function EstadoCard({ estado }: { estado: Estado }) {
     return (
       <div className="rounded border border-zinc-200 bg-white p-4 text-sm dark:border-zinc-800 dark:bg-zinc-900">
         <p className="text-zinc-600 dark:text-zinc-400">
-          Subiendo <span className="font-medium">{estado.nombre}</span>…
+          Subiendo y procesando <span className="font-medium">{estado.nombre}</span>…
+        </p>
+        <p className="mt-1 text-xs text-zinc-500">
+          Puede tardar 5–10 segundos por la lectura del Excel y las validaciones.
         </p>
       </div>
     );
@@ -107,19 +118,37 @@ function EstadoCard({ estado }: { estado: Estado }) {
     return (
       <div className="rounded border border-emerald-300 bg-emerald-50 p-4 text-sm dark:border-emerald-900 dark:bg-emerald-950/30">
         <p className="font-medium text-emerald-700 dark:text-emerald-300">
-          Subida registrada
+          Procesado correctamente
         </p>
         <p className="mt-1 text-zinc-700 dark:text-zinc-400">
           {estado.nombre} — importación{" "}
           <code className="text-xs">{estado.importacionId.slice(0, 8)}</code>
         </p>
-        <p className="mt-3 text-xs text-zinc-600 dark:text-zinc-400">
-          El procesamiento automático aún no está conectado. Mientras tanto,
-          corre el pipeline local:
+        {estado.totalClases !== undefined && (
+          <p className="mt-2 text-zinc-700 dark:text-zinc-400">
+            {estado.totalClases} clases cargadas · {estado.totalProblemas ?? 0} problemas detectados.
+          </p>
+        )}
+        <p className="mt-3 flex gap-3 text-xs">
+          <a
+            href={`/importaciones/${estado.importacionId}`}
+            className="text-emerald-700 underline dark:text-emerald-300"
+          >
+            Ver detalle
+          </a>
+          <a
+            href="/validacion"
+            className="text-emerald-700 underline dark:text-emerald-300"
+          >
+            Ver validación
+          </a>
+          <a
+            href="/eficiencia"
+            className="text-emerald-700 underline dark:text-emerald-300"
+          >
+            Ver eficiencia
+          </a>
         </p>
-        <pre className="mt-1 overflow-x-auto rounded bg-zinc-900 p-2 text-xs text-zinc-100">
-          cd proyecto_madrina && python main.py && python -m cargar.sync_supabase
-        </pre>
       </div>
     );
   }

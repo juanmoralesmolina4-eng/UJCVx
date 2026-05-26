@@ -3,11 +3,21 @@
 import { revalidatePath } from "next/cache";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { procesarImportacion } from "@/lib/procesar/pipeline";
+
+/** Quita tildes, espacios y caracteres especiales — Supabase Storage solo
+ *  acepta `[A-Za-z0-9!\-_.\*'()]`. */
+function sanitizarNombre(nombre: string): string {
+  const sinTildes = nombre.normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return sinTildes.replace(/[^A-Za-z0-9._-]/g, "_").replace(/_+/g, "_");
+}
 
 export interface ResultadoSubida {
   ok: boolean;
   importacionId?: string;
   mensaje?: string;
+  totalClases?: number;
+  totalProblemas?: number;
 }
 
 export async function subirExcel(formData: FormData): Promise<ResultadoSubida> {
@@ -25,7 +35,8 @@ export async function subirExcel(formData: FormData): Promise<ResultadoSubida> {
   const sb = createSupabaseAdminClient();
 
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const objectPath = `programacion/${stamp}__${archivo.name}`;
+  const nombreLimpio = sanitizarNombre(archivo.name);
+  const objectPath = `programacion/${stamp}__${nombreLimpio}`;
 
   const buffer = Buffer.from(await archivo.arrayBuffer());
 
@@ -76,6 +87,27 @@ export async function subirExcel(formData: FormData): Promise<ResultadoSubida> {
     };
   }
 
+  // Procesar de inmediato (lectura del Excel + validaciones + persistencia)
+  const resultado = await procesarImportacion(imp.id);
+
   revalidatePath("/importaciones");
-  return { ok: true, importacionId: imp.id };
+  revalidatePath("/validacion");
+  revalidatePath("/eficiencia");
+  revalidatePath("/catedraticos");
+  revalidatePath("/aulas");
+
+  if (!resultado.ok) {
+    return {
+      ok: false,
+      importacionId: imp.id,
+      mensaje: `Procesamiento: ${resultado.mensaje}`,
+    };
+  }
+
+  return {
+    ok: true,
+    importacionId: imp.id,
+    totalClases: resultado.totalClases,
+    totalProblemas: resultado.totalProblemas,
+  };
 }

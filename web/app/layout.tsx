@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Nav } from "@/components/nav";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,7 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "UJCVx — Programación Académica",
-  description: "Sistema de programación académica y gestión de pagos docentes de la Universidad José Cecilio del Valle.",
+  description:
+    "Sistema de programación académica y gestión de pagos docentes de la Universidad José Cecilio del Valle.",
 };
 
 export default function RootLayout({
@@ -27,7 +29,10 @@ export default function RootLayout({
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+        <Nav />
+        <div className="flex-1">{children}</div>
+      </body>
     </html>
   );
 }

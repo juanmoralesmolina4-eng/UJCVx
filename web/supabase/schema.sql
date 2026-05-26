@@ -1,18 +1,26 @@
 -- ============================================================================
--- UJCVx — Schema inicial
--- Diseñado multi-campus desde el día 1 (Tegucigalpa + Comayagua + futuras).
--- Optimizado para el flujo: cargar Excel → validar → exportar a Onlive/RRHH.
+-- UJCVx — Schema inicial para Supabase
+--
+-- CÓMO USAR:
+--   1. Crea un proyecto nuevo en https://supabase.com
+--   2. Ve a SQL Editor (ícono de base de datos a la izquierda)
+--   3. Pega TODO este archivo en una nueva query
+--   4. Run (botón verde abajo a la derecha)
+--   5. Al terminar: Settings → API → copia el Project URL y la `anon` key
+--      a tu `web/.env.local` (ver web/.env.example)
+--
+-- Es idempotente: puedes correrlo varias veces sin problemas.
 -- ============================================================================
 
--- Extensiones útiles
+-- Extensiones (Supabase ya tiene pgcrypto activado, uuid-ossp lo agregamos)
 create extension if not exists "uuid-ossp";
-create extension if not exists "pgcrypto";
+
 
 -- ============================================================================
 -- CATÁLOGOS — datos que cambian poco
 -- ============================================================================
 
-create table campuses (
+create table if not exists campuses (
   codigo        text primary key,
   nombre        text not null,
   ciudad        text not null,
@@ -25,7 +33,7 @@ insert into campuses (codigo, nombre, ciudad) values
 on conflict do nothing;
 
 
-create table periodos (
+create table if not exists periodos (
   id            uuid primary key default uuid_generate_v4(),
   codigo        text not null unique,
   anio          int  not null,
@@ -37,7 +45,7 @@ create table periodos (
 );
 
 
-create table carreras (
+create table if not exists carreras (
   id            uuid primary key default uuid_generate_v4(),
   codigo        text not null unique,
   nombre        text not null,
@@ -46,7 +54,7 @@ create table carreras (
 );
 
 
-create table aulas (
+create table if not exists aulas (
   id                uuid primary key default uuid_generate_v4(),
   campus_codigo     text not null references campuses(codigo),
   codigo            text not null,
@@ -59,7 +67,7 @@ create table aulas (
 );
 
 
-create table catedraticos (
+create table if not exists catedraticos (
   id                  uuid primary key default uuid_generate_v4(),
   nombre              text not null,
   nombre_normalizado  text not null unique,
@@ -72,7 +80,7 @@ create table catedraticos (
 );
 
 
-create table asignaturas (
+create table if not exists asignaturas (
   id            uuid primary key default uuid_generate_v4(),
   codigo        text not null unique,
   nombre        text not null,
@@ -86,13 +94,13 @@ create table asignaturas (
 -- IMPORTACIONES — cada carga de Excel queda registrada
 -- ============================================================================
 
-create table importaciones (
+create table if not exists importaciones (
   id            uuid primary key default uuid_generate_v4(),
-  tipo          text not null check (tipo in ('programacion', 'onlive', 'rrhh')),
+  tipo          text not null check (tipo in ('programacion', 'rrhh')),
   archivo       text not null,
   campus_codigo text references campuses(codigo),
   periodo_id    uuid references periodos(id),
-  subido_por    uuid,
+  subido_por    uuid references auth.users(id),
   total_filas   int,
   status        text not null default 'pendiente' check (status in ('pendiente', 'procesando', 'completada', 'fallida')),
   error         text,
@@ -105,7 +113,7 @@ create table importaciones (
 -- PROGRAMACIÓN — secciones de clase
 -- ============================================================================
 
-create table clases (
+create table if not exists clases (
   id                  uuid primary key default uuid_generate_v4(),
   periodo_id          uuid not null references periodos(id),
   campus_codigo       text not null references campuses(codigo),
@@ -138,12 +146,12 @@ create table clases (
   created_at          timestamptz default now()
 );
 
-create index idx_clases_periodo_campus on clases(periodo_id, campus_codigo);
-create index idx_clases_catedratico on clases(catedratico_id);
-create index idx_clases_codigo on clases(codigo);
+create index if not exists idx_clases_periodo_campus on clases(periodo_id, campus_codigo);
+create index if not exists idx_clases_catedratico   on clases(catedratico_id);
+create index if not exists idx_clases_codigo        on clases(codigo);
 
 
-create table bloques_horarios (
+create table if not exists bloques_horarios (
   id            uuid primary key default uuid_generate_v4(),
   clase_id      uuid not null references clases(id) on delete cascade,
   dia           text not null check (dia in ('LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM')),
@@ -152,27 +160,27 @@ create table bloques_horarios (
   constraint bloque_valido check (fin_min > inicio_min)
 );
 
-create index idx_bloques_clase on bloques_horarios(clase_id);
-create index idx_bloques_dia on bloques_horarios(dia, inicio_min);
+create index if not exists idx_bloques_clase on bloques_horarios(clase_id);
+create index if not exists idx_bloques_dia   on bloques_horarios(dia, inicio_min);
 
 
 -- ============================================================================
 -- VALIDACIÓN — corridas y problemas detectados
 -- ============================================================================
 
-create table corridas_validacion (
+create table if not exists corridas_validacion (
   id              uuid primary key default uuid_generate_v4(),
   periodo_id      uuid not null references periodos(id),
   campus_codigo   text references campuses(codigo),
   total_clases    int,
   total_problemas int,
   resumen         jsonb,
-  ejecutada_por   uuid,
+  ejecutada_por   uuid references auth.users(id),
   created_at      timestamptz default now()
 );
 
 
-create table problemas (
+create table if not exists problemas (
   id                uuid primary key default uuid_generate_v4(),
   corrida_id        uuid not null references corridas_validacion(id) on delete cascade,
   tipo              text not null,
@@ -182,20 +190,20 @@ create table problemas (
   extra             jsonb,
   resuelto          boolean default false,
   resuelto_at       timestamptz,
-  resuelto_por      uuid,
+  resuelto_por      uuid references auth.users(id),
   nota_resolucion   text,
   created_at        timestamptz default now()
 );
 
-create index idx_problemas_corrida on problemas(corrida_id);
-create index idx_problemas_no_resueltos on problemas(corrida_id) where not resuelto;
+create index if not exists idx_problemas_corrida      on problemas(corrida_id);
+create index if not exists idx_problemas_no_resueltos on problemas(corrida_id) where not resuelto;
 
 
 -- ============================================================================
 -- PAGOS — derivado de la programación, alimenta a RRHH
 -- ============================================================================
 
-create table corridas_pago (
+create table if not exists corridas_pago (
   id            uuid primary key default uuid_generate_v4(),
   periodo_id    uuid not null references periodos(id),
   campus_codigo text not null references campuses(codigo),
@@ -208,7 +216,7 @@ create table corridas_pago (
 );
 
 
-create table pagos_clase (
+create table if not exists pagos_clase (
   id                  uuid primary key default uuid_generate_v4(),
   corrida_pago_id     uuid not null references corridas_pago(id) on delete cascade,
   clase_id            uuid not null references clases(id),
@@ -221,7 +229,7 @@ create table pagos_clase (
 );
 
 
-create table pagos_catedratico (
+create table if not exists pagos_catedratico (
   id                  uuid primary key default uuid_generate_v4(),
   corrida_pago_id     uuid not null references corridas_pago(id) on delete cascade,
   catedratico_id      uuid not null references catedraticos(id),
@@ -241,3 +249,62 @@ create table pagos_catedratico (
   ) stored,
   unique (corrida_pago_id, catedratico_id)
 );
+
+
+-- ============================================================================
+-- ROW LEVEL SECURITY
+-- Supabase obliga RLS. Política inicial: cualquier usuario autenticado
+-- puede leer y escribir todo. Más adelante se afina por rol.
+-- ============================================================================
+
+do $$
+declare
+  t text;
+begin
+  for t in
+    select unnest(array[
+      'campuses', 'periodos', 'carreras', 'aulas', 'catedraticos', 'asignaturas',
+      'importaciones', 'clases', 'bloques_horarios',
+      'corridas_validacion', 'problemas',
+      'corridas_pago', 'pagos_clase', 'pagos_catedratico'
+    ])
+  loop
+    execute format('alter table %I enable row level security', t);
+    execute format(
+      'drop policy if exists "auth_read_%s" on %I',
+      t, t
+    );
+    execute format(
+      'create policy "auth_read_%s" on %I for select using (auth.role() = ''authenticated'')',
+      t, t
+    );
+    execute format(
+      'drop policy if exists "auth_write_%s" on %I',
+      t, t
+    );
+    execute format(
+      'create policy "auth_write_%s" on %I for all using (auth.role() = ''authenticated'') with check (auth.role() = ''authenticated'')',
+      t, t
+    );
+  end loop;
+end $$;
+
+
+-- ============================================================================
+-- STORAGE — bucket para los Excel originales subidos
+-- ============================================================================
+
+insert into storage.buckets (id, name, public)
+values ('uploads', 'uploads', false)
+on conflict (id) do nothing;
+
+-- Política: solo usuarios autenticados pueden subir/leer
+drop policy if exists "auth_upload" on storage.objects;
+create policy "auth_upload"
+  on storage.objects for insert
+  with check (bucket_id = 'uploads' and auth.role() = 'authenticated');
+
+drop policy if exists "auth_read_uploads" on storage.objects;
+create policy "auth_read_uploads"
+  on storage.objects for select
+  using (bucket_id = 'uploads' and auth.role() = 'authenticated');

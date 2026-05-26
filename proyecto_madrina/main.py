@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from cargar import programacion
-from exportar import reporte, excel_limpio, rrhh, metricas_excel
+from exportar import reporte, excel_limpio, rrhh, metricas_excel, json_dashboard
 from exportar import csv as exportar_csv
 from metricas import aulas as metricas_aulas
 from metricas import docentes as metricas_docentes
@@ -43,6 +43,7 @@ class RutasSalida:
     csv: Path
     pago_rrhh: Path
     metricas: Path
+    json_dashboard: Path
 
 
 def ejecutar(ruta_excel: Path, salidas: RutasSalida) -> None:
@@ -76,6 +77,9 @@ def ejecutar(ruta_excel: Path, salidas: RutasSalida) -> None:
     md = metricas_docentes.calcular(clases_validacion)
     metricas_excel.exportar(ma, md, salidas.metricas)
 
+    print(f"Generando JSON dashboard -> {salidas.json_dashboard.name}")
+    json_dashboard.exportar(clases_validacion, problemas, ma, md, salidas.json_dashboard)
+
     print("Listo.")
 
 
@@ -88,6 +92,7 @@ if __name__ == "__main__":
         csv=raiz / "Programacion_normalizada.csv",
         pago_rrhh=raiz / "Pago_RRHH_borrador.xlsx",
         metricas=raiz / "Reporte_metricas.xlsx",
+        json_dashboard=raiz / "web" / "data" / "dashboard.json",
     )
 
     if len(sys.argv) > 1:

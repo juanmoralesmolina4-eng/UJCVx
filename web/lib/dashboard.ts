@@ -17,11 +17,15 @@ export interface ReferenciaProblema {
 }
 
 export interface ProblemaJSON {
+  /** UUID — solo presente cuando los datos vienen de Supabase. */
+  id?: string;
   tipo: string;
   severidad: "alta" | "media" | "baja";
   descripcion: string;
   referencias: ReferenciaProblema[];
   extra: Record<string, unknown>;
+  resuelto?: boolean;
+  nota_resolucion?: string | null;
 }
 
 export interface MetricaAulaJSON {

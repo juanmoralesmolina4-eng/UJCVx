@@ -8,6 +8,7 @@ const ITEMS = [
   { href: "/eficiencia", label: "Eficiencia" },
   { href: "/catedraticos", label: "Catedráticos" },
   { href: "/aulas", label: "Aulas" },
+  { href: "/pagos", label: "Pagos" },
 ];
 
 export function Nav() {

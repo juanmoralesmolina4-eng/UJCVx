@@ -1,5 +1,6 @@
 import { cargarDashboard } from "@/lib/dashboard";
 import type { ProblemaJSON } from "@/lib/dashboard";
+import { BotonResolver } from "./boton-resolver";
 
 export const metadata = {
   title: "Validación — UJCVx",
@@ -23,22 +24,32 @@ const COLOR_SEVERIDAD: Record<string, string> = {
   baja: "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300",
 };
 
-export default async function ValidacionPage() {
+export default async function ValidacionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ resueltos?: string }>;
+}) {
+  const { resueltos } = await searchParams;
+  const mostrarResueltos = resueltos === "true";
+
   const data = await cargarDashboard();
+  if (!data) return <SinDatos />;
 
-  if (!data) {
-    return <SinDatos />;
-  }
+  const problemasFiltrados = mostrarResueltos
+    ? data.problemas
+    : data.problemas.filter((p) => !p.resuelto);
 
-  const grupos = agruparPorTipo(data.problemas);
+  const grupos = agruparPorTipo(problemasFiltrados);
+  const totalActivos = data.problemas.filter((p) => !p.resuelto).length;
+  const totalResueltos = data.problemas.filter((p) => p.resuelto).length;
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-16">
       <header className="border-b border-zinc-200 pb-6 dark:border-zinc-800">
         <h1 className="text-3xl font-semibold tracking-tight">Validación</h1>
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-          {data.totales.problemas} problemas detectados en {data.totales.clases}{" "}
-          secciones del último análisis.
+          {totalActivos} problemas pendientes, {totalResueltos} resueltos · en{" "}
+          {data.totales.clases} secciones del último análisis.
         </p>
         <p className="mt-1 text-xs text-zinc-500">
           Generado {new Date(data.generado_at).toLocaleString("es-HN")}
@@ -51,10 +62,25 @@ export default async function ValidacionPage() {
         <Tarjeta label="Aulas en uso" valor={data.totales.aulas} />
       </section>
 
-      <section className="mt-10 space-y-8">
+      <section className="mt-8 flex items-center gap-3 text-sm">
+        <a
+          href="/validacion"
+          className={`rounded px-3 py-1.5 ${!mostrarResueltos ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900" : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"}`}
+        >
+          Pendientes ({totalActivos})
+        </a>
+        <a
+          href="/validacion?resueltos=true"
+          className={`rounded px-3 py-1.5 ${mostrarResueltos ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900" : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"}`}
+        >
+          Todos ({data.problemas.length})
+        </a>
+      </section>
+
+      <section className="mt-6 space-y-8">
         {grupos.length === 0 ? (
           <p className="text-zinc-600 dark:text-zinc-400">
-            No se encontraron problemas. Todo limpio.
+            {mostrarResueltos ? "No hay problemas registrados." : "Todo limpio: ningún problema pendiente."}
           </p>
         ) : (
           grupos.map(([tipo, problemas]) => (
@@ -95,8 +121,12 @@ function GrupoProblemas({
       <ul className="space-y-2">
         {problemas.map((p, i) => (
           <li
-            key={i}
-            className="rounded border border-zinc-200 bg-white p-3 text-sm dark:border-zinc-800 dark:bg-zinc-900"
+            key={p.id ?? i}
+            className={`rounded border p-3 text-sm ${
+              p.resuelto
+                ? "border-zinc-200 bg-zinc-50 opacity-60 dark:border-zinc-800 dark:bg-zinc-950"
+                : "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900"
+            }`}
           >
             <div className="flex items-start gap-2">
               <span
@@ -105,7 +135,9 @@ function GrupoProblemas({
                 {p.severidad}
               </span>
               <div className="flex-1">
-                <p className="text-zinc-800 dark:text-zinc-200">
+                <p
+                  className={`text-zinc-800 dark:text-zinc-200 ${p.resuelto ? "line-through" : ""}`}
+                >
                   {p.descripcion}
                 </p>
                 {p.referencias.length > 0 && (
@@ -115,7 +147,19 @@ function GrupoProblemas({
                       .join(" · ")}
                   </p>
                 )}
+                {p.resuelto && p.nota_resolucion && (
+                  <p className="mt-1 text-xs italic text-emerald-700 dark:text-emerald-300">
+                    Nota: {p.nota_resolucion}
+                  </p>
+                )}
               </div>
+              {p.id && (
+                <BotonResolver
+                  id={p.id}
+                  resuelto={p.resuelto ?? false}
+                  notaActual={p.nota_resolucion ?? ""}
+                />
+              )}
             </div>
           </li>
         ))}
@@ -145,11 +189,8 @@ function SinDatos() {
           Corre el pipeline para generar el dashboard:
         </p>
         <pre className="mt-3 overflow-x-auto rounded bg-zinc-900 p-3 text-xs text-zinc-100">
-          cd proyecto_madrina && python main.py
+          cd proyecto_madrina && python main.py && python -m cargar.sync_supabase
         </pre>
-        <p className="mt-3 text-zinc-700 dark:text-zinc-400">
-          Genera <code>web/data/dashboard.json</code>, que esta página lee.
-        </p>
       </div>
     </main>
   );

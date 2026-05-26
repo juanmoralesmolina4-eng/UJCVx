@@ -39,11 +39,14 @@ interface ClaseRow {
 }
 
 interface ProblemaRow {
+  id: string;
   tipo: string;
   severidad: "alta" | "media" | "baja";
   descripcion: string;
   referencias: ReferenciaProblema[] | null;
   extra: Record<string, unknown> | null;
+  resuelto: boolean | null;
+  nota_resolucion: string | null;
 }
 
 interface CorridaRow {
@@ -73,7 +76,7 @@ export async function cargarDashboardDesdeSupabase(): Promise<DashboardData | nu
 
   const { data: problemasRaw } = await sb
     .from("problemas")
-    .select("tipo, severidad, descripcion, referencias, extra")
+    .select("id, tipo, severidad, descripcion, referencias, extra, resuelto, nota_resolucion")
     .eq("corrida_id", corrida.id);
 
   const { data: clasesRaw } = await sb
@@ -89,11 +92,14 @@ export async function cargarDashboardDesdeSupabase(): Promise<DashboardData | nu
   const clases = (clasesRaw ?? []) as ClaseRow[];
   const problemas: ProblemaJSON[] = (problemasRaw ?? []).map(
     (p: ProblemaRow) => ({
+      id: p.id,
       tipo: p.tipo,
       severidad: p.severidad,
       descripcion: p.descripcion,
       referencias: p.referencias ?? [],
       extra: p.extra ?? {},
+      resuelto: p.resuelto ?? false,
+      nota_resolucion: p.nota_resolucion,
     }),
   );
 

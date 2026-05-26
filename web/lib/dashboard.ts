@@ -1,11 +1,9 @@
 /**
- * Carga el JSON generado por el pipeline Python (proyecto_madrina/main.py).
- * Vive en `web/data/dashboard.json` — está gitignored porque contiene
- * nombres de docentes.
+ * Carga los datos del dashboard. Intenta Supabase primero; si no hay datos
+ * o falla, cae al JSON local generado por el pipeline Python.
  *
- * Esto es la interfaz temporal mientras Supabase no es la fuente de verdad.
- * El día que se conecte, este archivo se reemplaza por consultas a Supabase
- * pero el `DashboardData` se mantiene como contrato.
+ * El `DashboardData` es el contrato estable que consumen las páginas —
+ * la fuente subyacente es indistinta.
  */
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -67,6 +65,18 @@ const RUTA_DASHBOARD = path.resolve(
 );
 
 export async function cargarDashboard(): Promise<DashboardData | null> {
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    try {
+      const { cargarDashboardDesdeSupabase } = await import(
+        "@/lib/supabase/queries"
+      );
+      const desdeDb = await cargarDashboardDesdeSupabase();
+      if (desdeDb) return desdeDb;
+    } catch (e) {
+      console.warn("[dashboard] Supabase falló, usando JSON local:", e);
+    }
+  }
+
   try {
     const raw = await fs.readFile(RUTA_DASHBOARD, "utf-8");
     return JSON.parse(raw) as DashboardData;

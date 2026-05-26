@@ -1,26 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+
+import { subirExcel } from "./actions";
 
 type Estado =
   | { kind: "idle" }
-  | { kind: "leyendo"; nombre: string }
-  | { kind: "listo"; nombre: string; tamano: number }
+  | { kind: "subiendo"; nombre: string }
+  | { kind: "ok"; nombre: string; importacionId: string }
   | { kind: "error"; mensaje: string };
 
 export function UploadForm() {
   const [estado, setEstado] = useState<Estado>({ kind: "idle" });
   const [dragOver, setDragOver] = useState(false);
+  const [, startTransition] = useTransition();
+  const router = useRouter();
 
-  function recibirArchivo(archivo: File) {
+  function subir(archivo: File) {
     if (!archivo.name.toLowerCase().endsWith(".xlsx")) {
       setEstado({ kind: "error", mensaje: "Solo se aceptan archivos .xlsx" });
       return;
     }
-    setEstado({ kind: "leyendo", nombre: archivo.name });
-    setTimeout(() => {
-      setEstado({ kind: "listo", nombre: archivo.name, tamano: archivo.size });
-    }, 600);
+    if (archivo.size > 50 * 1024 * 1024) {
+      setEstado({ kind: "error", mensaje: "El archivo excede 50 MB" });
+      return;
+    }
+
+    setEstado({ kind: "subiendo", nombre: archivo.name });
+
+    const formData = new FormData();
+    formData.append("archivo", archivo);
+
+    startTransition(async () => {
+      const r = await subirExcel(formData);
+      if (r.ok && r.importacionId) {
+        setEstado({
+          kind: "ok",
+          nombre: archivo.name,
+          importacionId: r.importacionId,
+        });
+        router.refresh();
+      } else {
+        setEstado({
+          kind: "error",
+          mensaje: r.mensaje ?? "Error desconocido",
+        });
+      }
+    });
   }
 
   return (
@@ -35,7 +62,7 @@ export function UploadForm() {
           e.preventDefault();
           setDragOver(false);
           const f = e.dataTransfer.files?.[0];
-          if (f) recibirArchivo(f);
+          if (f) subir(f);
         }}
         className={[
           "flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center transition-colors",
@@ -50,30 +77,15 @@ export function UploadForm() {
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) recibirArchivo(f);
+            if (f) subir(f);
           }}
         />
         <p className="text-lg font-medium">Suelta el Excel aquí</p>
         <p className="mt-2 text-sm text-zinc-500">o haz clic para elegirlo</p>
-        <p className="mt-4 text-xs text-zinc-400">
-          Acepta .xlsx — los .xls hay que convertirlos primero.
-        </p>
+        <p className="mt-4 text-xs text-zinc-400">Acepta .xlsx hasta 50 MB.</p>
       </label>
 
       <EstadoCard estado={estado} />
-
-      {estado.kind === "listo" && (
-        <div className="rounded border border-amber-300 bg-amber-50 p-4 text-sm dark:border-amber-900 dark:bg-amber-950/30">
-          <p className="font-medium text-amber-800 dark:text-amber-200">
-            Procesamiento aún no conectado
-          </p>
-          <p className="mt-1 text-zinc-700 dark:text-zinc-400">
-            El archivo se leyó correctamente. Falta enchufar el pipeline al
-            backend (Supabase + endpoint de procesamiento). Por ahora se sigue
-            ejecutando desde Python en local.
-          </p>
-        </div>
-      )}
     </div>
   );
 }
@@ -81,26 +93,33 @@ export function UploadForm() {
 function EstadoCard({ estado }: { estado: Estado }) {
   if (estado.kind === "idle") return null;
 
-  if (estado.kind === "leyendo") {
+  if (estado.kind === "subiendo") {
     return (
       <div className="rounded border border-zinc-200 bg-white p-4 text-sm dark:border-zinc-800 dark:bg-zinc-900">
         <p className="text-zinc-600 dark:text-zinc-400">
-          Leyendo <span className="font-medium">{estado.nombre}</span>…
+          Subiendo <span className="font-medium">{estado.nombre}</span>…
         </p>
       </div>
     );
   }
 
-  if (estado.kind === "listo") {
-    const kb = (estado.tamano / 1024).toFixed(0);
+  if (estado.kind === "ok") {
     return (
       <div className="rounded border border-emerald-300 bg-emerald-50 p-4 text-sm dark:border-emerald-900 dark:bg-emerald-950/30">
         <p className="font-medium text-emerald-700 dark:text-emerald-300">
-          Archivo cargado
+          Subida registrada
         </p>
         <p className="mt-1 text-zinc-700 dark:text-zinc-400">
-          {estado.nombre} ({kb} KB)
+          {estado.nombre} — importación{" "}
+          <code className="text-xs">{estado.importacionId.slice(0, 8)}</code>
         </p>
+        <p className="mt-3 text-xs text-zinc-600 dark:text-zinc-400">
+          El procesamiento automático aún no está conectado. Mientras tanto,
+          corre el pipeline local:
+        </p>
+        <pre className="mt-1 overflow-x-auto rounded bg-zinc-900 p-2 text-xs text-zinc-100">
+          cd proyecto_madrina && python main.py && python -m cargar.sync_supabase
+        </pre>
       </div>
     );
   }

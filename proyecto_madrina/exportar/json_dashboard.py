@@ -31,6 +31,7 @@ def exportar(
             "aulas": len(metricas_aulas),
         },
         "problemas_por_tipo": dict(Counter(p.tipo for p in problemas)),
+        "clases": [_clase_a_dict(c) for c in clases],
         "problemas": [_problema_a_dict(p) for p in problemas],
         "metricas_aulas": [_aula_a_dict(m) for m in metricas_aulas],
         "metricas_docentes": [_docente_a_dict(m) for m in metricas_docentes],
@@ -38,6 +39,31 @@ def exportar(
 
     with open(ruta_salida, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
+
+
+def _clase_a_dict(c: Clase) -> dict:
+    return {
+        "hoja": c.hoja,
+        "fila": c.fila,
+        "catedratico": c.catedratico,
+        "catedratico_es_nuevo": c.catedratico_es_nuevo,
+        "codigo": c.codigo,
+        "codigos_alternos": c.codigos_alternos,
+        "asignatura": c.asignatura,
+        "carrera": c.carrera,
+        "alumnos": c.alumnos,
+        "modalidad": c.modalidad,
+        "aula": c.aula,
+        "seccion": c.seccion,
+        "horas_presenciales": c.horas_presenciales,
+        "horas_asincronicas": c.horas_asincronicas,
+        "horas_totales": c.horas_totales,
+        "bloques": [
+            {"dia": b.dia, "inicio_min": b.inicio, "fin_min": b.fin}
+            for b in c.bloques
+        ],
+        "observaciones": c.observaciones,
+    }
 
 
 def _problema_a_dict(p: Problema) -> dict:

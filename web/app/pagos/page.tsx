@@ -26,11 +26,11 @@ export default async function PagosPage() {
     <main className="mx-auto max-w-5xl px-6 py-16">
       <header className="border-b border-zinc-200 pb-6 dark:border-zinc-800">
         <h1 className="text-3xl font-semibold tracking-tight">
-          Generar archivo de pago
+          Generación de archivo de pago
         </h1>
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-          Calcula el pago docente en el formato exacto que pide Recursos
-          Humanos y lo descarga como Excel.
+          Cálculo del pago docente en el formato requerido por la Dirección
+          de Recursos Humanos, con descarga directa en Excel.
         </p>
       </header>
 

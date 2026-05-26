@@ -14,14 +14,12 @@ export default async function EficienciaPage() {
         <h1 className="text-3xl font-semibold tracking-tight">Eficiencia</h1>
         <div className="mt-8 rounded border border-amber-300 bg-amber-50 p-6 text-sm dark:border-amber-900 dark:bg-amber-950/30">
           <p className="font-medium text-amber-800 dark:text-amber-200">
-            No hay datos cargados todavía
+            Aún no se ha cargado ninguna programación
           </p>
           <p className="mt-2 text-zinc-700 dark:text-zinc-400">
-            Corre el pipeline para generar el dashboard:
+            Cargue el archivo Excel desde la sección{" "}
+            <a href="/cargar" className="underline">Cargar</a> para ver las métricas.
           </p>
-          <pre className="mt-3 overflow-x-auto rounded bg-zinc-900 p-3 text-xs text-zinc-100">
-            cd proyecto_madrina && python main.py
-          </pre>
         </div>
       </main>
     );
@@ -48,7 +46,8 @@ export default async function EficienciaPage() {
       <header className="border-b border-zinc-200 pb-6 dark:border-zinc-800">
         <h1 className="text-3xl font-semibold tracking-tight">Eficiencia</h1>
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-          Aulas y docentes — oportunidades de optimización.
+          Uso de aulas y carga docente. Permite identificar oportunidades de
+          optimización del período.
         </p>
       </header>
 

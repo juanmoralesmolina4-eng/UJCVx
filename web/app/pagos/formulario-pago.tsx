@@ -127,15 +127,15 @@ export function FormularioPago() {
 
       <div className="mt-6 flex items-center justify-between">
         <p className="text-xs text-zinc-500">
-          Las deducciones (IHSS, UJCV, embargo, ACH) se dejan en 0 y se
-          completan a mano en el Excel.
+          Las deducciones (IHSS, UJCV, embargo, ACH) se generan en cero y
+          deben completarse manualmente en el archivo descargado.
         </p>
         <button
           onClick={descargar}
           disabled={isPending}
           className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
         >
-          {isPending ? "Generando…" : "Descargar Excel"}
+          {isPending ? "Generando…" : "Descargar archivo"}
         </button>
       </div>
     </div>

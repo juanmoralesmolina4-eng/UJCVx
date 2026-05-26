@@ -20,8 +20,8 @@ export default async function AulasPage() {
       <header className="border-b border-zinc-200 pb-6 dark:border-zinc-800">
         <h1 className="text-3xl font-semibold tracking-tight">Aulas</h1>
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-          {fisicas.length} aulas físicas y {virtuales.length} virtuales en
-          uso. Click en una para ver su horario semanal.
+          {fisicas.length} aulas físicas y {virtuales.length} espacios virtuales
+          en uso. Seleccione una para ver su horario semanal.
         </p>
       </header>
 

@@ -25,11 +25,11 @@ export function UploadForm() {
 
   function subir(archivo: File) {
     if (!archivo.name.toLowerCase().endsWith(".xlsx")) {
-      setEstado({ kind: "error", mensaje: "Solo se aceptan archivos .xlsx" });
+      setEstado({ kind: "error", mensaje: "Solo se admiten archivos con extensión .xlsx" });
       return;
     }
     if (archivo.size > 50 * 1024 * 1024) {
-      setEstado({ kind: "error", mensaje: "El archivo excede 50 MB" });
+      setEstado({ kind: "error", mensaje: "El archivo excede el tamaño máximo de 50 MB" });
       return;
     }
 
@@ -88,9 +88,9 @@ export function UploadForm() {
             if (f) subir(f);
           }}
         />
-        <p className="text-lg font-medium">Suelta el Excel aquí</p>
-        <p className="mt-2 text-sm text-zinc-500">o haz clic para elegirlo</p>
-        <p className="mt-4 text-xs text-zinc-400">Acepta .xlsx hasta 50 MB.</p>
+        <p className="text-lg font-medium">Arrastre el archivo Excel</p>
+        <p className="mt-2 text-sm text-zinc-500">o haga clic para seleccionarlo</p>
+        <p className="mt-4 text-xs text-zinc-400">Formato .xlsx, tamaño máximo 50 MB.</p>
       </label>
 
       <EstadoCard estado={estado} />
@@ -105,10 +105,10 @@ function EstadoCard({ estado }: { estado: Estado }) {
     return (
       <div className="rounded border border-zinc-200 bg-white p-4 text-sm dark:border-zinc-800 dark:bg-zinc-900">
         <p className="text-zinc-600 dark:text-zinc-400">
-          Subiendo y procesando <span className="font-medium">{estado.nombre}</span>…
+          Cargando y procesando <span className="font-medium">{estado.nombre}</span>…
         </p>
         <p className="mt-1 text-xs text-zinc-500">
-          Puede tardar 5–10 segundos por la lectura del Excel y las validaciones.
+          El proceso puede tardar entre 5 y 10 segundos según el tamaño del archivo.
         </p>
       </div>
     );
@@ -118,7 +118,7 @@ function EstadoCard({ estado }: { estado: Estado }) {
     return (
       <div className="rounded border border-emerald-300 bg-emerald-50 p-4 text-sm dark:border-emerald-900 dark:bg-emerald-950/30">
         <p className="font-medium text-emerald-700 dark:text-emerald-300">
-          Procesado correctamente
+          Procesamiento completado
         </p>
         <p className="mt-1 text-zinc-700 dark:text-zinc-400">
           {estado.nombre} — importación{" "}
@@ -126,7 +126,7 @@ function EstadoCard({ estado }: { estado: Estado }) {
         </p>
         {estado.totalClases !== undefined && (
           <p className="mt-2 text-zinc-700 dark:text-zinc-400">
-            {estado.totalClases} clases cargadas · {estado.totalProblemas ?? 0} problemas detectados.
+            {estado.totalClases} secciones cargadas · {estado.totalProblemas ?? 0} problemas detectados.
           </p>
         )}
         <p className="mt-3 flex gap-3 text-xs">
@@ -134,7 +134,7 @@ function EstadoCard({ estado }: { estado: Estado }) {
             href={`/importaciones/${estado.importacionId}`}
             className="text-emerald-700 underline dark:text-emerald-300"
           >
-            Ver detalle
+            Ver detalle de la importación
           </a>
           <a
             href="/validacion"
@@ -156,7 +156,7 @@ function EstadoCard({ estado }: { estado: Estado }) {
   return (
     <div className="rounded border border-rose-300 bg-rose-50 p-4 text-sm dark:border-rose-900 dark:bg-rose-950/30">
       <p className="font-medium text-rose-700 dark:text-rose-300">
-        No se pudo cargar
+        La carga no pudo completarse
       </p>
       <p className="mt-1 text-zinc-700 dark:text-zinc-400">{estado.mensaje}</p>
     </div>

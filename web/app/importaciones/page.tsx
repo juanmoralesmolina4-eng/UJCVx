@@ -42,8 +42,8 @@ export default async function ImportacionesPage() {
           Historial de cargas
         </h1>
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-          Cada Excel subido queda registrado junto con su estado de
-          procesamiento.
+          Registro completo de las importaciones realizadas con su estado
+          de procesamiento.
         </p>
       </header>
 
@@ -58,8 +58,8 @@ export default async function ImportacionesPage() {
 
       {!error && importaciones.length === 0 && (
         <div className="mt-8 rounded border border-zinc-200 bg-white p-6 text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-          Aún no hay importaciones. Sube un Excel desde la sección{" "}
-          <a href="/cargar" className="underline">Cargar Excel</a>.
+          Aún no se ha registrado ninguna importación. Cargue un archivo Excel
+          desde la sección <a href="/cargar" className="underline">Cargar</a>.
         </div>
       )}
 

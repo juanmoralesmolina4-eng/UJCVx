@@ -15,14 +15,14 @@ export default async function CatedraticosPage() {
       <header className="border-b border-zinc-200 pb-6 dark:border-zinc-800">
         <h1 className="text-3xl font-semibold tracking-tight">Catedráticos</h1>
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-          {docentes.length} catedráticos en el período actual. Click en uno
-          para ver su horario.
+          {docentes.length} catedráticos en el período actual. Seleccione uno
+          para ver su horario detallado.
         </p>
       </header>
 
       {docentes.length === 0 ? (
         <p className="mt-8 text-sm text-zinc-600 dark:text-zinc-400">
-          No hay catedráticos cargados.
+          Aún no se han cargado catedráticos.
         </p>
       ) : (
         <div className="mt-8 overflow-hidden rounded border border-zinc-200 dark:border-zinc-800">

@@ -48,11 +48,10 @@ export default async function ValidacionPage({
       <header className="border-b border-zinc-200 pb-6 dark:border-zinc-800">
         <h1 className="text-3xl font-semibold tracking-tight">Validación</h1>
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-          {totalActivos} problemas pendientes, {totalResueltos} resueltos · en{" "}
-          {data.totales.clases} secciones del último análisis.
+          {totalActivos} problemas pendientes y {totalResueltos} resueltos en {data.totales.clases} secciones del último análisis.
         </p>
         <p className="mt-1 text-xs text-zinc-500">
-          Generado {new Date(data.generado_at).toLocaleString("es-HN")}
+          Generado el {new Date(data.generado_at).toLocaleString("es-HN")}
         </p>
       </header>
 
@@ -80,7 +79,7 @@ export default async function ValidacionPage({
       <section className="mt-6 space-y-8">
         {grupos.length === 0 ? (
           <p className="text-zinc-600 dark:text-zinc-400">
-            {mostrarResueltos ? "No hay problemas registrados." : "Todo limpio: ningún problema pendiente."}
+            {mostrarResueltos ? "No hay problemas registrados." : "No hay problemas pendientes."}
           </p>
         ) : (
           grupos.map(([tipo, problemas]) => (
@@ -183,14 +182,12 @@ function SinDatos() {
       <h1 className="text-3xl font-semibold tracking-tight">Validación</h1>
       <div className="mt-8 rounded border border-amber-300 bg-amber-50 p-6 text-sm dark:border-amber-900 dark:bg-amber-950/30">
         <p className="font-medium text-amber-800 dark:text-amber-200">
-          No hay datos cargados todavía
+          Aún no se ha cargado ninguna programación
         </p>
         <p className="mt-2 text-zinc-700 dark:text-zinc-400">
-          Corre el pipeline para generar el dashboard:
+          Cargue el archivo Excel desde la sección{" "}
+          <a href="/cargar" className="underline">Cargar</a> para iniciar el análisis.
         </p>
-        <pre className="mt-3 overflow-x-auto rounded bg-zinc-900 p-3 text-xs text-zinc-100">
-          cd proyecto_madrina && python main.py && python -m cargar.sync_supabase
-        </pre>
       </div>
     </main>
   );

@@ -1,5 +1,5 @@
 /**
- * Middleware de autenticación.
+ * Proxy de autenticación (antes "middleware" — Next 16 lo renombró).
  *
  * Refresca la sesión de Supabase en cada request y redirige a /signin
  * si el usuario no está autenticado. Excepciones: las propias rutas de
@@ -13,7 +13,7 @@ const RUTAS_PUBLICAS = [
   "/auth/callback",
 ];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (

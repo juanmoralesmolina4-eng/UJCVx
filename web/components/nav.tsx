@@ -2,10 +2,12 @@ import Link from "next/link";
 
 const ITEMS = [
   { href: "/", label: "Inicio" },
-  { href: "/cargar", label: "Cargar Excel" },
+  { href: "/cargar", label: "Cargar" },
   { href: "/importaciones", label: "Historial" },
   { href: "/validacion", label: "Validación" },
   { href: "/eficiencia", label: "Eficiencia" },
+  { href: "/catedraticos", label: "Catedráticos" },
+  { href: "/aulas", label: "Aulas" },
 ];
 
 export function Nav() {

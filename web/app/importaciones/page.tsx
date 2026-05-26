@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const metadata = {
@@ -75,26 +77,55 @@ export default async function ImportacionesPage() {
             </thead>
             <tbody className="divide-y divide-zinc-200 bg-white dark:divide-zinc-800 dark:bg-zinc-900">
               {importaciones.map((imp) => (
-                <tr key={imp.id}>
-                  <td className="px-4 py-2 whitespace-nowrap text-zinc-600 dark:text-zinc-400">
-                    {new Date(imp.created_at).toLocaleString("es-HN")}
+                <tr
+                  key={imp.id}
+                  className="hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                >
+                  <td className="whitespace-nowrap text-zinc-600 dark:text-zinc-400">
+                    <Link
+                      href={`/importaciones/${imp.id}`}
+                      className="block px-4 py-2"
+                    >
+                      {new Date(imp.created_at).toLocaleString("es-HN")}
+                    </Link>
                   </td>
-                  <td className="px-4 py-2 uppercase text-xs text-zinc-500">
-                    {imp.tipo}
+                  <td className="uppercase text-xs text-zinc-500">
+                    <Link
+                      href={`/importaciones/${imp.id}`}
+                      className="block px-4 py-2"
+                    >
+                      {imp.tipo}
+                    </Link>
                   </td>
-                  <td className="px-4 py-2 break-all text-xs">{imp.archivo}</td>
-                  <td className="px-4 py-2 text-right tabular-nums">
-                    {imp.total_filas ?? "—"}
+                  <td className="break-all text-xs">
+                    <Link
+                      href={`/importaciones/${imp.id}`}
+                      className="block px-4 py-2"
+                    >
+                      {imp.archivo}
+                    </Link>
+                  </td>
+                  <td className="text-right tabular-nums">
+                    <Link
+                      href={`/importaciones/${imp.id}`}
+                      className="block px-4 py-2"
+                    >
+                      {imp.total_filas ?? "—"}
+                    </Link>
                   </td>
                   <td className="px-4 py-2">
-                    <span
-                      className={`rounded px-2 py-0.5 text-xs uppercase tracking-wider ${COLOR_STATUS[imp.status]}`}
-                    >
-                      {imp.status}
-                    </span>
-                    {imp.error && (
-                      <p className="mt-1 text-xs text-rose-600">{imp.error}</p>
-                    )}
+                    <Link href={`/importaciones/${imp.id}`} className="block">
+                      <span
+                        className={`rounded px-2 py-0.5 text-xs uppercase tracking-wider ${COLOR_STATUS[imp.status]}`}
+                      >
+                        {imp.status}
+                      </span>
+                      {imp.error && (
+                        <p className="mt-1 text-xs text-rose-600">
+                          {imp.error}
+                        </p>
+                      )}
+                    </Link>
                   </td>
                 </tr>
               ))}

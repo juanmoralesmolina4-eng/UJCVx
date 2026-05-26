@@ -195,9 +195,50 @@ def sync(json_path: Path | None = None) -> None:
             })
         sb.table("problemas").insert(filas_problemas).execute()
 
+    print(f"Subiendo archivos generados al bucket uploads/outputs/{importacion_id[:8]}.../")
+    _subir_archivos_generados(sb, importacion_id)
+
     print()
     print(f"OK — importación {importacion_id[:8]}, corrida {corrida_id[:8]}")
     print(f"   {data['totales']['clases']} clases, {data['totales']['problemas']} problemas")
+
+
+# Mapeo nombre_archivo_local -> nombre_lógico (usado en URL de descarga)
+ARCHIVOS_GENERADOS = {
+    "Reporte_validacion.xlsx": "validacion",
+    "Programacion_normalizada.xlsx": "normalizado",
+    "Programacion_normalizada.csv": "csv",
+    "Pago_RRHH_borrador.xlsx": "pago",
+    "Reporte_metricas.xlsx": "metricas",
+}
+
+CONTENT_TYPES = {
+    ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ".csv": "text/csv",
+}
+
+
+def _subir_archivos_generados(sb: Client, importacion_id: str) -> None:
+    """Sube los archivos de salida del pipeline al bucket `uploads` bajo
+    `outputs/{importacion_id}/`. Estos archivos son los que la web ofrece
+    para descarga."""
+    for nombre_local, nombre_logico in ARCHIVOS_GENERADOS.items():
+        ruta_local = RAIZ / nombre_local
+        if not ruta_local.exists():
+            print(f"  ! {nombre_local} no existe, salto")
+            continue
+
+        ext = ruta_local.suffix
+        content_type = CONTENT_TYPES.get(ext, "application/octet-stream")
+        object_path = f"outputs/{importacion_id}/{nombre_logico}{ext}"
+
+        contenido = ruta_local.read_bytes()
+        sb.storage.from_("uploads").upload(
+            object_path,
+            contenido,
+            {"content-type": content_type, "upsert": "true"},
+        )
+        print(f"  OK {nombre_logico}{ext} ({len(contenido) // 1024} KB)")
 
 
 if __name__ == "__main__":

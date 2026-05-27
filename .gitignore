@@ -16,6 +16,8 @@ transcripcion.txt
 # Propuesta y documentos con nombres propios
 Propuesta*.pdf
 propuesta.html
+Manual*.pdf
+manual/img/
 
 # ============================================================
 # Reportes generados (es output, no fuente)

@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Manual de uso — UJCVx</title>
+<style>
+  @page {
+    size: Letter;
+    margin: 22mm 20mm 22mm 20mm;
+    @bottom-center { content: counter(page) " / " counter(pages); font-family: "Helvetica", sans-serif; font-size: 9pt; color: #888; }
+  }
+  @page :first { @bottom-center { content: ""; } }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  :root {
+    --azul: #0B2545;
+    --azul-claro: #13315C;
+    --acento: #8DA9C4;
+    --dorado: #B08D57;
+    --gris: #4A4A4A;
+    --gris-claro: #6B6B6B;
+    --gris-muy-claro: #E8E6E0;
+    --fondo: #F7F5F0;
+    --linea: #D8D2C4;
+    --verde: #2D6A4F;
+    --rojo: #8A3A3A;
+  }
+
+  body {
+    font-family: "Georgia", "Cambria", serif;
+    color: var(--gris);
+    font-size: 11pt;
+    line-height: 1.55;
+    background: white;
+  }
+
+  /* ============ PORTADA ============ */
+  .cover {
+    page-break-after: always;
+    height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+  .cover-middle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .cover-top {
+    border-bottom: 3px solid var(--dorado);
+    padding-bottom: 14px;
+  }
+
+  .cover-top .institucion {
+    font-family: "Helvetica", sans-serif;
+    font-size: 9pt;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gris-claro);
+  }
+
+  .cover-top .doc-tipo {
+    font-family: "Helvetica", sans-serif;
+    font-size: 9pt;
+    letter-spacing: 4px;
+    color: var(--dorado);
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  .cover-middle h1 {
+    font-family: "Georgia", serif;
+    font-size: 44pt;
+    color: var(--azul);
+    font-weight: normal;
+    line-height: 1.05;
+    margin: 0 0 18px 0;
+    letter-spacing: -0.5px;
+  }
+
+  .cover-middle .subtitulo {
+    font-size: 16pt;
+    color: var(--azul-claro);
+    font-style: italic;
+    line-height: 1.35;
+    margin: 0;
+    max-width: 540px;
+  }
+
+  .cover-middle .divisor {
+    width: 80px;
+    height: 2px;
+    background: var(--dorado);
+    margin: 28px 0;
+  }
+
+  .cover-middle .descripcion {
+    font-size: 11pt;
+    color: var(--gris);
+    line-height: 1.6;
+    max-width: 540px;
+  }
+
+  .cover-bottom {
+    border-top: 1px solid var(--linea);
+    padding-top: 18px;
+    display: flex;
+    justify-content: space-between;
+    font-family: "Helvetica", sans-serif;
+    font-size: 9.5pt;
+    color: var(--gris);
+  }
+
+  .cover-bottom .label {
+    font-size: 7.5pt;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gris-claro);
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .cover-bottom .valor {
+    color: var(--azul);
+    font-weight: bold;
+  }
+
+  /* ============ ÍNDICE ============ */
+  .toc {
+    page-break-after: always;
+    padding-top: 24px;
+  }
+
+  .toc h2 {
+    font-family: "Georgia", serif;
+    color: var(--azul);
+    font-size: 28pt;
+    font-weight: normal;
+    margin: 0 0 24px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--dorado);
+  }
+
+  .toc-list { list-style: none; padding: 0; margin: 0; }
+  .toc-list > li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px dotted var(--linea);
+    font-size: 11pt;
+  }
+  .toc-list > li > .titulo {
+    font-family: "Helvetica", sans-serif;
+    color: var(--azul);
+  }
+  .toc-list > li > .titulo .num {
+    color: var(--dorado);
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  .toc-list > li > .pag {
+    font-family: "Helvetica", sans-serif;
+    color: var(--gris-claro);
+    font-size: 10pt;
+  }
+
+  /* ============ SECCIONES ============ */
+  section.cap {
+    page-break-before: always;
+  }
+  section.cap > h2 {
+    font-family: "Georgia", serif;
+    color: var(--azul);
+    font-size: 26pt;
+    font-weight: normal;
+    border-bottom: 2px solid var(--dorado);
+    padding-bottom: 10px;
+    margin: 0 0 18px 0;
+  }
+  section.cap > h2 .num {
+    color: var(--dorado);
+    font-family: "Helvetica", sans-serif;
+    font-size: 14pt;
+    letter-spacing: 2px;
+    margin-right: 14px;
+  }
+  section.cap .lead {
+    font-size: 12pt;
+    color: var(--azul-claro);
+    font-style: italic;
+    border-left: 3px solid var(--dorado);
+    padding: 4px 0 4px 14px;
+    margin: 0 0 22px 0;
+    line-height: 1.5;
+  }
+
+  h3 {
+    font-family: "Helvetica", sans-serif;
+    color: var(--azul-claro);
+    font-size: 13pt;
+    font-weight: bold;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    page-break-after: avoid;
+  }
+
+  h4 {
+    font-family: "Helvetica", sans-serif;
+    color: var(--azul);
+    font-size: 10pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 14px 0 6px 0;
+  }
+
+  p { margin: 0 0 10px 0; text-align: justify; }
+  ul, ol { margin: 6px 0 14px 0; padding-left: 22px; }
+  li { margin-bottom: 5px; }
+
+  strong { color: var(--azul); }
+  em { color: var(--azul-claro); }
+
+  code, kbd {
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 10pt;
+    background: var(--fondo);
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: var(--azul);
+  }
+
+  pre {
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 9.5pt;
+    background: var(--azul);
+    color: white;
+    padding: 12px 14px;
+    border-radius: 3px;
+    overflow-x: auto;
+    line-height: 1.4;
+    margin: 10px 0;
+  }
+
+  /* Tarjetas con info */
+  .nota {
+    background: var(--fondo);
+    border-left: 3px solid var(--dorado);
+    padding: 10px 14px;
+    margin: 14px 0;
+    font-size: 10.5pt;
+    page-break-inside: avoid;
+  }
+  .nota .titulo {
+    font-family: "Helvetica", sans-serif;
+    font-weight: bold;
+    color: var(--azul);
+    font-size: 9.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .nota.aviso {
+    border-left-color: #B85C0A;
+    background: #FEF6E9;
+  }
+  .nota.aviso .titulo { color: #6B3700; }
+
+  /* Tablas */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 10pt;
+  }
+  th {
+    background: var(--azul);
+    color: white;
+    padding: 8px 11px;
+    text-align: left;
+    font-family: "Helvetica", sans-serif;
+    font-size: 9pt;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: normal;
+  }
+  td {
+    padding: 8px 11px;
+    border-bottom: 1px solid var(--linea);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: var(--fondo); }
+  td.metrica { font-weight: bold; color: var(--azul); }
+
+  /* Imágenes */
+  figure {
+    margin: 16px 0;
+    page-break-inside: avoid;
+  }
+  figure img {
+    width: 100%;
+    border: 1px solid var(--linea);
+    border-radius: 3px;
+  }
+  figure figcaption {
+    font-family: "Helvetica", sans-serif;
+    font-size: 9pt;
+    color: var(--gris-claro);
+    text-align: center;
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  /* Pasos numerados */
+  ol.pasos {
+    padding-left: 0;
+    list-style: none;
+    counter-reset: paso;
+  }
+  ol.pasos > li {
+    counter-increment: paso;
+    padding-left: 36px;
+    position: relative;
+    margin-bottom: 10px;
+  }
+  ol.pasos > li::before {
+    content: counter(paso);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 26px;
+    height: 26px;
+    background: var(--dorado);
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 26px;
+    font-family: "Helvetica", sans-serif;
+    font-weight: bold;
+    font-size: 11pt;
+  }
+
+  /* Definiciones (glosario) */
+  dl.glosario { margin: 12px 0; }
+  dl.glosario dt {
+    font-family: "Helvetica", sans-serif;
+    color: var(--azul);
+    font-weight: bold;
+    font-size: 10pt;
+    margin-top: 10px;
+    padding-bottom: 2px;
+    border-bottom: 1px dotted var(--linea);
+  }
+  dl.glosario dd {
+    margin: 4px 0 0 0;
+    font-size: 10pt;
+    color: var(--gris);
+  }
+
+  /* Resumen final */
+  .cierre {
+    background: var(--azul);
+    color: white;
+    padding: 24px 28px;
+    margin-top: 26px;
+    page-break-inside: avoid;
+  }
+  .cierre h3 {
+    color: var(--dorado);
+    margin: 0 0 12px 0;
+    font-size: 13pt;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .cierre p { color: white; }
+  .cierre strong { color: var(--dorado); }
+</style>
+</head>
+<body>
+
+<!-- ====== PORTADA ====== -->
+<section class="cover">
+  <div class="cover-top">
+    <div class="institucion">Universidad José Cecilio del Valle</div>
+    <div class="doc-tipo">Manual de Uso · Versión 1.0</div>
+  </div>
+  <div class="cover-middle">
+    <h1>UJCVx</h1>
+    <div class="divisor"></div>
+    <p class="subtitulo">Sistema de programación académica y gestión de pagos docentes.</p>
+    <p class="descripcion">Este manual le guía paso a paso por cada sección del sistema, explica los conceptos técnicos detrás del cálculo de pagos y las validaciones automáticas, y resuelve las dudas más frecuentes. Léalo en orden la primera vez; después úselo como referencia.</p>
+  </div>
+  <div class="cover-bottom">
+    <div>
+      <span class="label">Dirigido a</span>
+      <span class="valor">Vicerrectoría, decanos y Recursos Humanos</span>
+    </div>
+    <div>
+      <span class="label">Mantiene</span>
+      <span class="valor">Equipo técnico UJCVx</span>
+    </div>
+  </div>
+</section>
+
+<!-- ====== ÍNDICE ====== -->
+<section class="toc">
+  <h2>Contenido</h2>
+  <ol class="toc-list">
+    <li><span class="titulo"><span class="num">1</span>Qué es UJCVx</span><span class="pag">3</span></li>
+    <li><span class="titulo"><span class="num">2</span>Primer ingreso al sistema</span><span class="pag">4</span></li>
+    <li><span class="titulo"><span class="num">3</span>El panel principal</span><span class="pag">6</span></li>
+    <li><span class="titulo"><span class="num">4</span>Carga de programación</span><span class="pag">8</span></li>
+    <li><span class="titulo"><span class="num">5</span>Validación de problemas</span><span class="pag">11</span></li>
+    <li><span class="titulo"><span class="num">6</span>Eficiencia de aulas y docentes</span><span class="pag">15</span></li>
+    <li><span class="titulo"><span class="num">7</span>Catedráticos</span><span class="pag">18</span></li>
+    <li><span class="titulo"><span class="num">8</span>Aulas</span><span class="pag">20</span></li>
+    <li><span class="titulo"><span class="num">9</span>Generación de pagos</span><span class="pag">22</span></li>
+    <li><span class="titulo"><span class="num">10</span>Historial de cargas</span><span class="pag">25</span></li>
+    <li><span class="titulo"><span class="num">11</span>Conceptos técnicos</span><span class="pag">26</span></li>
+    <li><span class="titulo"><span class="num">12</span>Glosario</span><span class="pag">29</span></li>
+    <li><span class="titulo"><span class="num">13</span>Resolución de problemas comunes</span><span class="pag">30</span></li>
+  </ol>
+</section>
+
+<!-- ====== 1. QUÉ ES UJCVx ====== -->
+<section class="cap">
+  <h2><span class="num">01</span>Qué es UJCVx</h2>
+  <p class="lead">Un único lugar para programar las clases del período, detectar errores antes del pago y entregar a Recursos Humanos el archivo exacto que necesitan.</p>
+
+  <p>UJCVx reemplaza el proceso manual de cruzar el Excel de programación con el sistema externo y revisar fila por fila lo que el reporte de Recursos Humanos arrojaba. Hace lo siguiente automáticamente:</p>
+
+  <ul>
+    <li><strong>Lee el archivo Excel</strong> de programación con todas sus hojas (una por carrera), normaliza los datos y los almacena.</li>
+    <li><strong>Detecta ocho clases de problemas</strong>: secciones duplicadas, solapes de aula, solapes de catedrático, horas mal contadas, horarios sospechosos, sobrecarga, subutilización y secciones con demasiados alumnos.</li>
+    <li><strong>Calcula métricas de eficiencia</strong> de aulas (porcentaje de ocupación) y docentes (horas en huecos entre clases).</li>
+    <li><strong>Genera el archivo de pago</strong> en el formato exacto que pide Recursos Humanos, con la fórmula precalculada por catedrático.</li>
+    <li><strong>Mantiene un historial</strong> completo de cada carga, lo que permite comparar períodos y descargar los reportes generados en cualquier momento.</li>
+  </ul>
+
+  <h3>Qué pasa al subir un archivo</h3>
+  <p>Cuando usted carga un Excel, el sistema ejecuta el siguiente proceso en menos de diez segundos:</p>
+  <ol class="pasos">
+    <li>Guarda el archivo original en almacenamiento privado.</li>
+    <li>Lee todas las hojas y omite la consolidada para evitar duplicados.</li>
+    <li>Normaliza los datos: limpia formatos de horario (07:00, 7:00, 7:00-8:50), nombres de catedráticos, alumnos sumados ("12 + 5" se vuelve 17), códigos múltiples (ICI3120 / ICI3117), aulas y secciones.</li>
+    <li>Ejecuta las ocho validaciones automáticas y guarda los problemas encontrados.</li>
+    <li>Calcula métricas por aula y por docente.</li>
+    <li>Deja todo listo para visualización y descarga.</li>
+  </ol>
+
+  <div class="nota">
+    <span class="titulo">Multi-campus</span>
+    El sistema diferencia automáticamente Campus Tegucigalpa y Campus Comayagua a partir del sufijo de la sección: las secciones que terminan en <code>-T</code> son de Tegucigalpa y las que terminan en <code>-C</code> son de Comayagua. No tiene que indicarlo manualmente.
+  </div>
+</section>
+
+<!-- ====== 2. PRIMER INGRESO ====== -->
+<section class="cap">
+  <h2><span class="num">02</span>Primer ingreso al sistema</h2>
+  <p class="lead">Acceso con correo institucional y contraseña. Cada usuario crea su cuenta una sola vez y entra normalmente desde entonces.</p>
+
+  <h3>Crear su cuenta</h3>
+  <ol class="pasos">
+    <li>Abra <code>https://ujc-vx.vercel.app</code> en su navegador. La página le pedirá ingresar.</li>
+    <li>Haga clic en la pestaña <strong>Crear cuenta</strong>.</li>
+    <li>Escriba su correo institucional (<code>usuario@ujcv.edu.hn</code>) y una contraseña de al menos 8 caracteres.</li>
+    <li>Haga clic en <strong>Crear cuenta</strong>.</li>
+    <li>Si el sistema le pide confirmar el correo, revise su bandeja de entrada (y la carpeta de no deseado) y haga clic en el enlace de confirmación. Después regrese a la página de ingreso.</li>
+  </ol>
+
+  <figure>
+    <img src="img/signin.png" alt="Pantalla de ingreso">
+    <figcaption>Pantalla de ingreso con pestañas para entrar o crear cuenta.</figcaption>
+  </figure>
+
+  <h3>Entrar al sistema</h3>
+  <ol class="pasos">
+    <li>En la pestaña <strong>Ingresar</strong>, escriba su correo y contraseña.</li>
+    <li>Haga clic en <strong>Ingresar</strong>.</li>
+    <li>El sistema lo llevará al panel principal.</li>
+  </ol>
+
+  <h3>Cerrar sesión</h3>
+  <p>Su correo aparece siempre al pie del menú lateral izquierdo. Haga clic sobre él y seleccione <strong>Cerrar sesión</strong>. La próxima vez que abra la página tendrá que volver a ingresar.</p>
+
+  <div class="nota aviso">
+    <span class="titulo">Su contraseña</span>
+    El sistema nunca le pedirá su contraseña por correo, ni por teléfono, ni por chat. Solo se ingresa en la pantalla de <code>/signin</code>. Si recibe un correo que dice ser de UJCVx y le pide la contraseña, ignórelo y avise al equipo técnico.
+  </div>
+</section>
+
+<!-- ====== 3. PANEL PRINCIPAL ====== -->
+<section class="cap">
+  <h2><span class="num">03</span>El panel principal</h2>
+  <p class="lead">Es la primera pantalla después de ingresar. Resume el estado del período en curso en una sola vista.</p>
+
+  <figure>
+    <img src="img/panel.png" alt="Panel principal">
+    <figcaption>Panel principal con KPIs, problemas pendientes, última carga y accesos rápidos.</figcaption>
+  </figure>
+
+  <h3>Las cuatro tarjetas superiores (KPIs)</h3>
+  <table>
+    <thead>
+      <tr><th>Tarjeta</th><th>Qué muestra</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="metrica">Secciones</td>
+        <td>Cantidad total de secciones de clase cargadas. Una sección es un grupo concreto de una asignatura (ej: MAT1014 sección A-T).</td>
+      </tr>
+      <tr>
+        <td class="metrica">Catedráticos</td>
+        <td>Cantidad de docentes distintos en el período. Un catedrático que da varias clases cuenta una sola vez.</td>
+      </tr>
+      <tr>
+        <td class="metrica">Aulas en uso</td>
+        <td>Cantidad de aulas físicas distintas (las virtuales no cuentan acá). El porcentaje debajo es la ocupación promedio: cuántas horas a la semana están ocupadas, sobre 84 horas posibles (7:00 a 21:00 lun-sáb).</td>
+      </tr>
+      <tr>
+        <td class="metrica">Problemas pendientes</td>
+        <td>Cantidad de problemas detectados que aún no han sido resueltos. El ícono se pone rojo cuando hay alguno.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Atención requerida</h3>
+  <p>Lista los cinco problemas más graves pendientes, ordenados por severidad (alta, media, baja). Cada uno muestra el tipo del problema en una etiqueta de color y la descripción concreta. Para ver todos los problemas, use el enlace "Ver todos" o vaya a <strong>Validación</strong> en el menú lateral.</p>
+
+  <h3>Última carga</h3>
+  <p>Muestra el nombre del archivo cargado más reciente, su fecha y estado (Completada / Procesando / Fallida). El enlace "Ver detalle" lo lleva a la página de la importación, donde puede descargar los reportes generados.</p>
+
+  <h3>Accesos rápidos</h3>
+  <p>Tres atajos a las acciones que más se usan: cargar una nueva programación, generar el archivo de pago para Recursos Humanos, y ver las métricas de eficiencia.</p>
+
+  <h3>Menú lateral</h3>
+  <p>A la izquierda están todas las secciones del sistema, agrupadas por uso:</p>
+  <ul>
+    <li><strong>General</strong>: Panel.</li>
+    <li><strong>Programación</strong>: Cargar, Historial, Validación, Eficiencia.</li>
+    <li><strong>Recursos</strong>: Catedráticos, Aulas.</li>
+    <li><strong>Pagos</strong>: Generar pago.</li>
+  </ul>
+</section>
+
+<!-- ====== 4. CARGA ====== -->
+<section class="cap">
+  <h2><span class="num">04</span>Carga de programación</h2>
+  <p class="lead">El punto de entrada del sistema. Aquí sube el Excel del período y el sistema hace el resto.</p>
+
+  <figure>
+    <img src="img/cargar.png" alt="Pantalla de carga">
+    <figcaption>Zona de carga con arrastrar y soltar.</figcaption>
+  </figure>
+
+  <h3>Cómo cargar un archivo</h3>
+  <ol class="pasos">
+    <li>En el menú lateral, haga clic en <strong>Cargar</strong>.</li>
+    <li>Arrastre el archivo Excel desde su explorador hacia la zona punteada, o haga clic dentro de la zona para abrir el selector de archivos.</li>
+    <li>El sistema valida que sea un archivo <code>.xlsx</code> de menos de 50 MB.</li>
+    <li>Aparece un cuadro indicando que está procesando. Espera entre 5 y 15 segundos, según el tamaño del Excel.</li>
+    <li>Al terminar, muestra cuántas secciones se cargaron y cuántos problemas detectó. Los enlaces le permiten ver el detalle, ir a validación o a eficiencia.</li>
+  </ol>
+
+  <h3>Qué tipos de archivos son válidos</h3>
+  <p>El sistema acepta el formato estandarizado de programación de UJCV, con estas características:</p>
+  <ul>
+    <li>Extensión <code>.xlsx</code> (los <code>.xls</code> antiguos hay que convertirlos primero abriéndolos en Excel y guardándolos como nuevo formato).</li>
+    <li>Una hoja por carrera, más una hoja consolidada opcional (esta última se ignora para evitar duplicados).</li>
+    <li>Encabezado en la fila 7 con las columnas: N°, CATEDRÁTICO/A, CÓDIGO, ASIGNATURA, CARRERA, ALUMNOS, MODALIDAD, AULA, SECCIÓN, HORAS PRESENCIALES, HORAS ASINCRÓNICAS, HORAS TOTALES, LUN, MAR, MIE, JUE, VIE, SAB, DOM, OBSERVACIONES.</li>
+    <li>Tamaño máximo: 50 MB. El archivo real ronda los 18 MB.</li>
+  </ul>
+
+  <h3>Qué pasa después de cargar</h3>
+  <p>El sistema queda con la programación actualizada. Las páginas de Validación, Eficiencia, Catedráticos, Aulas y Generación de pagos reflejan automáticamente los datos nuevos.</p>
+
+  <p>La carga anterior no se pierde: queda en el <strong>Historial</strong> y puede consultarse en cualquier momento. Si una nueva carga del mismo período se hace, el sistema usa los datos más recientes para mostrar, pero conserva las anteriores como referencia.</p>
+
+  <div class="nota">
+    <span class="titulo">Errores comunes al cargar</span>
+    Si el archivo no es <code>.xlsx</code>, está dañado, o pesa más de 50 MB, el sistema le mostrará un mensaje claro. Si el archivo no tiene la estructura esperada (encabezado en otra fila, columnas faltantes), el sistema cargará lo que pueda interpretar y reportará el resto como problemas para revisar.
+  </div>
+
+  <h3>Variantes que el sistema tolera</h3>
+  <p>El sistema normaliza automáticamente formatos inconsistentes en el archivo original:</p>
+  <table>
+    <thead><tr><th>Campo</th><th>Variantes aceptadas</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="metrica">Horarios</td>
+        <td><code>7:00 - 8:50</code>, <code>07:00-08:50</code>, <code>7:00 10:50</code> (sin guion), <code>8:00 - 9:50 LAB</code>, <code>13:00 - 14:50 virtual</code>.</td>
+      </tr>
+      <tr>
+        <td class="metrica">Alumnos</td>
+        <td>Número simple (<code>15</code>) o suma (<code>12 + 5</code> se convierte en 17).</td>
+      </tr>
+      <tr>
+        <td class="metrica">Catedráticos</td>
+        <td>Cualquier capitalización; el sufijo <code>(NUEVO)</code> se separa como bandera.</td>
+      </tr>
+      <tr>
+        <td class="metrica">Códigos</td>
+        <td>Uno solo (<code>MAT1014</code>) o varios separados por <code>/</code> (<code>ICI3120 / ICI3117</code>).</td>
+      </tr>
+      <tr>
+        <td class="metrica">Modalidad</td>
+        <td><code>PRESENCIAL</code>, <code>VIRTUAL</code>, <code>SEMIPRESENCIAL</code> o <code>SEMI-PRESENCIAL</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ====== 5. VALIDACIÓN ====== -->
+<section class="cap">
+  <h2><span class="num">05</span>Validación de problemas</h2>
+  <p class="lead">El sistema corre ocho validaciones automáticas en cada carga y aquí se ven los hallazgos. Cada problema puede marcarse como resuelto cuando se atiende.</p>
+
+  <figure>
+    <img src="img/validacion.png" alt="Pantalla de validación">
+    <figcaption>Validación agrupada por tipo de problema, con severidad y acciones.</figcaption>
+  </figure>
+
+  <h3>Cómo se lee la pantalla</h3>
+  <p>Los problemas se agrupan por tipo. Cada grupo tiene un título y la cantidad de problemas que contiene. Dentro de un grupo, cada problema muestra:</p>
+  <ul>
+    <li>Una <strong>etiqueta de severidad</strong> en color: rojo (alta), ámbar (media), gris (baja).</li>
+    <li>La <strong>descripción del problema</strong>, con los datos concretos (qué clase, qué catedrático, qué aula, qué horario).</li>
+    <li>La <strong>referencia al archivo original</strong>: nombre de hoja y número de fila para que pueda ir directo al Excel a corregir si lo necesita.</li>
+    <li>Un botón <strong>Resolver</strong> que permite marcarlo como atendido y opcionalmente añadir una nota.</li>
+  </ul>
+
+  <h3>Pestañas Pendientes / Todos</h3>
+  <p>Por defecto solo se muestran los problemas pendientes. Use la pestaña <strong>Todos</strong> para ver también los que ya fueron resueltos, con su nota de resolución. Un problema resuelto puede reabrirse en cualquier momento con el botón <strong>Reabrir</strong>.</p>
+
+  <h3>Los ocho tipos de validaciones</h3>
+
+  <h4>Solape de aula</h4>
+  <p><strong>Qué detecta:</strong> dos clases distintas que comparten la misma aula física en el mismo día, con horarios que se cruzan.</p>
+  <p><strong>Por qué importa:</strong> si no se resuelve, el día de clase los estudiantes y catedráticos llegan al aula y se encuentran que ya está ocupada.</p>
+  <p><strong>Cómo resolver:</strong> reasignar una de las dos clases a un aula libre en ese horario, o cambiar el horario de una de ellas. El sistema no aplica el cambio automáticamente, pero detecta el conflicto.</p>
+
+  <h4>Solape de catedrático</h4>
+  <p><strong>Qué detecta:</strong> un mismo catedrático asignado a dos clases distintas en horarios que se cruzan.</p>
+  <p><strong>Por qué importa:</strong> el catedrático físicamente no puede estar en dos lugares a la vez. Es uno de los errores más caros de detectar tarde porque afecta directamente la planilla.</p>
+
+  <h4>Horas inconsistentes</h4>
+  <p><strong>Qué detecta:</strong> diferencia entre las horas declaradas en la columna <em>Horas Presenciales</em> o <em>Horas Totales</em>, y la suma real de bloques en las columnas LUN a DOM. Hay dos subtipos:</p>
+  <ul>
+    <li><strong>Sobre-programada</strong>: los bloques suman más horas que las declaradas. Ej: declara 4 horas pero el horario suma 6.</li>
+    <li><strong>Sub-programada</strong>: los bloques suman menos horas que las declaradas. Ej: declara 6 horas pero el horario suma 4.</li>
+  </ul>
+  <p><strong>Por qué importa:</strong> afecta directamente el pago. Si declara 6 y solo da 4, está pagando dos horas de más. Si declara 4 y da 6, le paga de menos.</p>
+
+  <h4>Duplicados</h4>
+  <p><strong>Qué detecta:</strong> la misma sección (mismo catedrático, mismo código de asignatura, misma sección) que aparece más de una vez en el archivo.</p>
+  <p><strong>Por qué importa:</strong> termina pagándose dos veces lo mismo.</p>
+
+  <h4>Sobrecarga docente</h4>
+  <p><strong>Qué detecta:</strong> catedráticos con más de 40 horas semanales sumando todas sus clases.</p>
+  <p><strong>Por qué importa:</strong> indica que un docente probablemente quedó con más carga de la que puede realmente atender, o que hubo un error de duplicación en la asignación.</p>
+
+  <h4>Subutilización docente</h4>
+  <p><strong>Qué detecta:</strong> catedráticos con menos de 4 horas semanales asignadas en total.</p>
+  <p><strong>Por qué importa:</strong> puede ser correcto (un docente con una sola clase pequeña) o puede ser una asignación incompleta que falta cargar. Vale la pena revisarlo.</p>
+
+  <h4>Secciones grandes</h4>
+  <p><strong>Qué detecta:</strong> secciones con más de 30 alumnos matriculados.</p>
+  <p><strong>Por qué importa:</strong> verificar que el aula asignada tiene capacidad suficiente o considerar abrir una segunda sección.</p>
+
+  <h4>Horarios sospechosos</h4>
+  <p><strong>Qué detecta:</strong> bloques continuos de más de cinco horas sin corte.</p>
+  <p><strong>Por qué importa:</strong> casi siempre es un error de captura, por ejemplo poner <code>7:00 - 20:50</code> en lugar de dos bloques separados. Aunque sea válido, vale la pena confirmar.</p>
+
+  <h4>Consolidación inconsistente</h4>
+  <p><strong>Qué detecta:</strong> cuando el archivo contiene una hoja consolidada (que repite las clases de todas las carreras) y esa cantidad no cuadra con la suma de las hojas por carrera.</p>
+  <p><strong>Por qué importa:</strong> indica que el archivo está desincronizado internamente. Hay que decidir cuál fuente es la correcta y corregir la otra.</p>
+
+  <div class="nota">
+    <span class="titulo">Cómo usar la sección</span>
+    Cada vez que se carga una programación nueva, se generan los problemas para esa versión. Resolverlos no modifica el Excel original — es una nota interna del sistema. La práctica recomendada es: cargar, revisar cada problema, decidir si requiere corrección en el Excel; si requiere, ajustar y volver a cargar; los problemas resueltos quedan registrados como referencia.
+  </div>
+</section>
+
+<!-- ====== 6. EFICIENCIA ====== -->
+<section class="cap">
+  <h2><span class="num">06</span>Eficiencia de aulas y docentes</h2>
+  <p class="lead">Aquí se mide qué tan bien se está aprovechando la infraestructura física y el tiempo de los docentes. Permite identificar aulas vacías y docentes con horarios fragmentados.</p>
+
+  <figure>
+    <img src="img/eficiencia.png" alt="Pantalla de eficiencia">
+    <figcaption>Métricas de eficiencia con KPIs, tabla de ocupación de aulas y tabla de docentes con huecos.</figcaption>
+  </figure>
+
+  <h3>Los cuatro indicadores del encabezado</h3>
+  <table>
+    <thead><tr><th>Indicador</th><th>Cálculo</th><th>Cuándo es bueno</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="metrica">Ocupación promedio</td>
+        <td>Promedio del porcentaje de ocupación de todas las aulas físicas.</td>
+        <td>Entre 50 % y 70 % es saludable. Menos indica subuso, más indica saturación.</td>
+      </tr>
+      <tr>
+        <td class="metrica">Aulas subutilizadas</td>
+        <td>Cantidad de aulas físicas con ocupación menor al 25 %.</td>
+        <td>Idealmente debería ser cero. Si hay aulas subutilizadas, considere reubicar clases hacia ellas para liberar las saturadas.</td>
+      </tr>
+      <tr>
+        <td class="metrica">Docentes con huecos</td>
+        <td>Cantidad de docentes con más de 4 horas semanales de huecos entre clases.</td>
+        <td>Cuanto menor, mejor. Indica horarios mal armados que obligan al docente a quedarse en campus sin clase.</td>
+      </tr>
+      <tr>
+        <td class="metrica">Docentes ineficientes</td>
+        <td>Cantidad de docentes cuya eficiencia es menor al 70 %.</td>
+        <td>Eficiencia = horas de clase ÷ horas totales en campus (clase + huecos). 100 % significa sin huecos.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Tabla de ocupación por aula</h3>
+  <p>Lista cada aula física con:</p>
+  <ul>
+    <li><strong>Horas a la semana</strong> que está ocupada por clases.</li>
+    <li><strong>Barra de ocupación</strong> visual: roja si está bajo 25 %, azul si está en el rango medio, verde si está sobre 80 %.</li>
+    <li><strong>Cantidad de clases distintas</strong> que pasan por esa aula.</li>
+    <li><strong>Cantidad de catedráticos distintos</strong> que la usan.</li>
+  </ul>
+
+  <p>La jornada de referencia es 7:00 a 21:00 de lunes a sábado, lo que equivale a 84 horas por semana. Es contra ese total que se calcula el porcentaje.</p>
+
+  <h3>Tabla de docentes con más huecos</h3>
+  <p>Ordena los catedráticos por la cantidad de horas semanales que pasan en el campus entre clase y clase sin clase asignada. Las filas en rojo marcan los docentes con huecos mayores a 4 horas o eficiencia menor al 70 %.</p>
+
+  <p>Para cada uno se ve:</p>
+  <ul>
+    <li><strong>Horas a la semana</strong> de clase efectivamente impartidas.</li>
+    <li><strong>Días</strong> en los que tiene clases (1 a 6).</li>
+    <li><strong>Huecos</strong> totales en horas (tiempo entre clases del mismo día).</li>
+    <li><strong>Eficiencia</strong> en porcentaje: cuánto del tiempo en campus es clase real.</li>
+  </ul>
+
+  <div class="nota">
+    <span class="titulo">Cómo interpretar los huecos</span>
+    Un catedrático con clases de 8:00 a 9:50 y luego de 13:00 a 14:50 tiene un hueco de 3 horas entre la primera y la segunda. Esa es tiempo que está en campus sin clase. Un docente con clases pegadas (de 8:00 a 9:50 y de 10:00 a 11:50) tiene cero huecos. La eficiencia de docentes con clases compactadas siempre es mayor.
+  </div>
+</section>
+
+<!-- ====== 7. CATEDRÁTICOS ====== -->
+<section class="cap">
+  <h2><span class="num">07</span>Catedráticos</h2>
+  <p class="lead">Listado completo de los docentes del período, con el horario semanal individual de cada uno.</p>
+
+  <figure>
+    <img src="img/catedraticos.png" alt="Listado de catedráticos">
+    <figcaption>Listado con cantidad de clases, asignaturas, horas semanales y carreras.</figcaption>
+  </figure>
+
+  <h3>El listado</h3>
+  <p>Una fila por catedrático, con los siguientes datos:</p>
+  <ul>
+    <li><strong>Nombre</strong> completo. Si el sistema detectó la etiqueta <code>(NUEVO)</code> en el archivo original, aparece una etiqueta ámbar al lado del nombre.</li>
+    <li><strong>Cantidad de clases</strong> que da.</li>
+    <li><strong>Asignaturas distintas</strong> que imparte (puede dar varias secciones de la misma asignatura).</li>
+    <li><strong>Horas a la semana</strong>, sumando todas sus clases.</li>
+    <li><strong>Carreras</strong> a las que pertenecen sus clases.</li>
+  </ul>
+
+  <h3>Ver el horario de un catedrático</h3>
+  <p>Haga clic sobre el nombre del catedrático para abrir su página de detalle. Verá:</p>
+  <ul>
+    <li><strong>Tarjetas resumen</strong>: clases, horas semanales, días que trabaja, asignaturas distintas.</li>
+    <li><strong>Horario semanal visual</strong>: una rejilla de lunes a sábado de 7:00 a 21:00, con sus clases dibujadas como bloques coloreados (cada asignatura tiene su color). Cada bloque indica el horario, el código, la sección y el aula.</li>
+    <li><strong>Tabla de sus clases</strong>: lista completa con código, asignatura, sección, aula, alumnos y horas. Desde acá puede hacer clic sobre el aula para ir a la página de esa aula y ver qué más pasa ahí.</li>
+  </ul>
+
+  <figure>
+    <img src="img/catedratico_detalle.png" alt="Detalle de un catedrático">
+    <figcaption>Detalle de un catedrático con su horario semanal y la tabla completa de sus clases.</figcaption>
+  </figure>
+
+  <div class="nota">
+    <span class="titulo">Atajos de navegación</span>
+    Desde el horario o la tabla de clases puede saltar al aula con un clic. Desde la página del aula puede saltar a cualquier otro catedrático que la use. Esto le permite investigar conflictos sin tener que volver al listado.
+  </div>
+</section>
+
+<!-- ====== 8. AULAS ====== -->
+<section class="cap">
+  <h2><span class="num">08</span>Aulas</h2>
+  <p class="lead">Listado de aulas en uso, con su nivel de ocupación, y horario semanal por aula.</p>
+
+  <figure>
+    <img src="img/aulas.png" alt="Listado de aulas">
+    <figcaption>Listado de aulas físicas con barra de ocupación y aulas virtuales en sección separada.</figcaption>
+  </figure>
+
+  <h3>Aulas físicas y espacios virtuales</h3>
+  <p>El listado se divide en dos secciones:</p>
+  <ul>
+    <li><strong>Aulas físicas</strong>: espacios concretos del campus con un código (102, 201, LAB CAD, ÁREA DEPORTIVA, etc.). Tienen una barra de ocupación porque sí existe el concepto de "lleno" en ellas.</li>
+    <li><strong>Espacios virtuales</strong>: clases marcadas como VIRTUAL en el Excel. No tienen aula física por lo que no se mide ocupación, pero sí aparecen en el listado por completitud.</li>
+  </ul>
+
+  <h3>Cada fila del listado</h3>
+  <ul>
+    <li><strong>Código</strong> del aula.</li>
+    <li><strong>Clases</strong>: cuántas clases distintas pasan por allí.</li>
+    <li><strong>Horas semanales</strong>: cuántas horas a la semana está ocupada.</li>
+    <li><strong>Ocupación</strong>: porcentaje sobre la jornada de referencia (84 h/sem), con color: rojo si está bajo 25 %, azul si está en el rango medio, verde si supera 80 %.</li>
+    <li><strong>Catedráticos</strong>: cuántos docentes distintos imparten clases ahí.</li>
+  </ul>
+
+  <h3>Ver el horario de un aula</h3>
+  <p>Haga clic sobre el código del aula para abrir su detalle. Verá:</p>
+  <ul>
+    <li>Tarjetas con: clases totales, horas semanales, catedráticos distintos y ocupación.</li>
+    <li>Horario semanal visual con todos los bloques de clase ocupando esa aula, coloreados por catedrático.</li>
+    <li>Tabla de las clases que se imparten en el aula, con enlace para ir a cada catedrático.</li>
+  </ul>
+
+  <figure>
+    <img src="img/aula_detalle.png" alt="Detalle de un aula">
+    <figcaption>Detalle de un aula con su horario y la tabla de clases que se imparten allí.</figcaption>
+  </figure>
+</section>
+
+<!-- ====== 9. PAGOS ====== -->
+<section class="cap">
+  <h2><span class="num">09</span>Generación de pagos</h2>
+  <p class="lead">Aquí se produce el archivo Excel que se entrega a Recursos Humanos, con el cálculo preciso por catedrático y por sección.</p>
+
+  <figure>
+    <img src="img/pagos.png" alt="Generación de pagos">
+    <figcaption>Formulario de parámetros y vista previa del total a pagar por catedrático.</figcaption>
+  </figure>
+
+  <h3>Parámetros del pago</h3>
+  <p>Antes de generar el archivo, configure los siguientes valores:</p>
+  <table>
+    <thead><tr><th>Parámetro</th><th>Qué significa</th><th>Valor típico</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="metrica">Número de pago</td>
+        <td>Cuál de los pagos del período es este (Primero, Segundo, Tercero, Cuarto).</td>
+        <td>Según corresponda al ciclo actual</td>
+      </tr>
+      <tr>
+        <td class="metrica">Campus</td>
+        <td>El campus al que aplica este pago. El sistema usa este valor para el título del archivo.</td>
+        <td>Tegucigalpa o Comayagua</td>
+      </tr>
+      <tr>
+        <td class="metrica">Período</td>
+        <td>El PAC al que pertenece (I, II o III).</td>
+        <td>II PAC 2026</td>
+      </tr>
+      <tr>
+        <td class="metrica">Semanas a pagar</td>
+        <td>Cuántas semanas cubre este pago parcial.</td>
+        <td>4 (típico en pagos mensuales)</td>
+      </tr>
+      <tr>
+        <td class="metrica">Tarifa por hora</td>
+        <td>Lempiras que se paga por cada hora clase.</td>
+        <td>230 lempiras (valor estándar)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>La fórmula del cálculo</h3>
+  <p>Para cada sección de clase:</p>
+  <pre>horas_totales   = horas_por_semana × semanas_a_pagar
+valor_por_clase = horas_totales × tarifa_por_hora</pre>
+
+  <p>Para cada catedrático:</p>
+  <pre>total_ingresos    = suma(valor_por_clase de todas sus clases)
+total_deducciones = IHSS + UJCV + EMBARGO + ACH
+total_a_pagar     = total_ingresos − total_deducciones</pre>
+
+  <h3>Vista previa</h3>
+  <p>Antes de descargar, la tabla de vista previa muestra para cada catedrático: cantidad de clases, horas semanales, total de ingresos a pagar y total a pagar (sin deducciones, que se completan a mano en el archivo descargado).</p>
+
+  <p>Esta vista usa siempre los valores por defecto (4 semanas, 230 L/h). Cuando cambia los parámetros del formulario, el cálculo se rehace al momento de descargar el archivo.</p>
+
+  <h3>Descargar el archivo</h3>
+  <p>Una vez configurados los parámetros, haga clic en <strong>Descargar</strong>. El navegador descarga un archivo Excel con el formato exacto que pide Recursos Humanos:</p>
+  <ul>
+    <li>Una hoja <strong>PROGRAMACIÓN GENERAL</strong> con todas las clases del campus.</li>
+    <li>Una hoja por carrera (UDAC, FIS-MAT, ARQ, ICI, etc.) con las clases de esa carrera.</li>
+    <li>34 columnas que incluyen, además de los datos de la clase, los campos de cálculo de pago: semanas a pagar, horas totales, valor por hora, valor por clase, total ingresos, deducciones y total a pagar.</li>
+    <li>Para cada catedrático, las filas se agrupan y los totales (ingresos, deducciones, a pagar) aparecen resaltados en la última fila del grupo.</li>
+  </ul>
+
+  <div class="nota aviso">
+    <span class="titulo">Deducciones</span>
+    El sistema deja las deducciones (IHSS, UJCV, EMBARGO, ACH) en cero. Recursos Humanos debe completarlas manualmente en el archivo descargado, sumando los descuentos de cada catedrático. Esto se hace así porque las deducciones dependen de muchos factores (techo del IHSS por mes, embargos judiciales activos, descuentos voluntarios de la UJCV, etc.) que no están en el sistema.
+  </div>
+
+  <h3>Catedráticos con datos faltantes</h3>
+  <p>Si una clase no tiene declaradas las horas presenciales, el sistema cae a las horas totales. Si tampoco tiene horas totales, paga cero esa clase, pero el catedrático sigue apareciendo en el listado para que se pueda detectar el problema.</p>
+
+  <p>La tarifa por hora puede ser personalizada por catedrático en versiones futuras del sistema. Por ahora, la tarifa del formulario aplica a todos. Si necesita tarifas distintas, descargue el archivo y modifique manualmente la columna <em>VALOR POR HORA CLASE</em> y recalcule en Excel.</p>
+</section>
+
+<!-- ====== 10. HISTORIAL ====== -->
+<section class="cap">
+  <h2><span class="num">10</span>Historial de cargas</h2>
+  <p class="lead">Registro de cada Excel cargado, con sus reportes generados disponibles para descarga en cualquier momento.</p>
+
+  <figure>
+    <img src="img/importaciones.png" alt="Historial de cargas">
+    <figcaption>Listado de importaciones recientes con fecha, archivo, cantidad de filas y estado.</figcaption>
+  </figure>
+
+  <h3>El listado</h3>
+  <p>Una fila por cada carga, ordenadas de la más reciente a la más antigua. Cada fila muestra fecha, nombre del archivo, cantidad de filas procesadas y estado (Completada, Procesando, Pendiente o Fallida).</p>
+
+  <h3>Detalle de una importación</h3>
+  <p>Haga clic sobre una fila para abrir su detalle. Allí encuentra los reportes que se generaron al procesar ese archivo, disponibles para descarga:</p>
+  <ul>
+    <li><strong>Reporte de validación</strong>: Excel con todos los problemas agrupados por tipo, listos para revisar.</li>
+    <li><strong>Programación normalizada</strong>: el mismo Excel pero con todos los campos limpios y los horarios en formato estándar.</li>
+    <li><strong>CSV exportable</strong>: los datos en formato CSV, importable a cualquier aplicación externa.</li>
+    <li><strong>Archivo de pago</strong>: el Excel en formato Recursos Humanos con la fórmula precalculada.</li>
+    <li><strong>Reporte de métricas</strong>: tablas de eficiencia de aulas y carga docente.</li>
+  </ul>
+
+  <p>Cada descarga usa un enlace temporal firmado válido por 60 segundos. Esto significa que la URL solo funciona inmediatamente después de hacer clic; no se puede compartir por correo o por chat.</p>
+</section>
+
+<!-- ====== 11. CONCEPTOS TÉCNICOS ====== -->
+<section class="cap">
+  <h2><span class="num">11</span>Conceptos técnicos</h2>
+  <p class="lead">Convenciones y reglas que el sistema aplica para interpretar los datos. Útil saberlas para entender los reportes.</p>
+
+  <h3>Campus por sufijo de sección</h3>
+  <p>El sistema deduce a qué campus pertenece cada sección a partir del sufijo:</p>
+  <ul>
+    <li>Las secciones que terminan en <code>-T</code> (por ejemplo <code>A-T</code>, <code>B-T</code>, <code>SED-A-T</code>) son de <strong>Tegucigalpa</strong>.</li>
+    <li>Las secciones que terminan en <code>-C</code> (por ejemplo <code>A-C</code>, <code>B-C</code>) son de <strong>Comayagua</strong>.</li>
+  </ul>
+  <p>Esta convención es la que se usa históricamente en UJCV. Si en el futuro se agregan más campus, se puede extender (por ejemplo <code>-S</code> para San Pedro Sula).</p>
+
+  <h3>Hora clase vs. hora reloj</h3>
+  <p>Una "hora clase" en UJCV dura 50 minutos. La hora reloj dura 60 minutos. El sistema convierte automáticamente entre ambas. Por ejemplo, un bloque de horario <code>7:00 - 8:50</code> dura 110 minutos reloj, pero corresponde a 2 horas clase (de 7:00 a 7:50 y de 8:00 a 8:50). La fórmula que aplica el sistema es:</p>
+  <pre>horas_clase = redondear_hacia_arriba(duración_en_minutos ÷ 60)</pre>
+  <p>Esta fórmula da los resultados correctos en todos los casos típicos: bloques de 50 min cuentan como 1 hora clase, de 110 min como 2, de 170 min como 3, y así sucesivamente.</p>
+
+  <h3>Hojas consolidadas</h3>
+  <p>Algunos Excels traen una hoja <em>PREGRADO-IA</em> o <em>PROGRAMACIÓN GENERAL</em> que repite todas las clases de las otras hojas. Si el sistema cargara esa hoja además de las hojas por carrera, contaría cada clase dos veces. Por eso las omite automáticamente. La excepción es la validación de <strong>Consolidación inconsistente</strong>: esa sí mira la hoja consolidada para verificar que la suma de las partes coincida con el total.</p>
+
+  <h3>Importación, corrida y períodos</h3>
+  <p>El sistema distingue tres conceptos:</p>
+  <dl class="glosario">
+    <dt>Período</dt>
+    <dd>El ciclo académico al que pertenece la programación (ej: II PAC 2026). Se identifica con un código único.</dd>
+    <dt>Importación</dt>
+    <dd>Cada vez que se sube un Excel. Una importación es una "fotografía" de la programación en un momento dado. Si el mismo período se vuelve a cargar, se crea una importación nueva — no se sobreescribe la anterior.</dd>
+    <dt>Corrida de validación</dt>
+    <dd>Cada vez que se ejecutan las ocho validaciones automáticas. Por defecto, se hace una corrida nueva con cada importación. Los problemas marcados como resueltos no se borran cuando se crea una corrida nueva.</dd>
+  </dl>
+
+  <h3>Cómo se calculan las métricas de aula</h3>
+  <p>Para cada aula física (las virtuales se excluyen):</p>
+  <pre>horas_ocupadas = suma de la duración de todos los bloques
+                 de clase que ocurren en esa aula
+
+porcentaje_ocupacion = horas_ocupadas ÷ 84 × 100</pre>
+  <p>El divisor de 84 representa la jornada teórica máxima: 14 horas/día (de 7:00 a 21:00) × 6 días (lunes a sábado).</p>
+
+  <h3>Cómo se calculan las métricas de docente</h3>
+  <p>Para cada catedrático:</p>
+  <pre>horas_semanales = suma de duración de todos sus bloques
+
+horas_huecos = para cada día, suma de la diferencia entre el fin
+                de cada clase y el inicio de la siguiente
+
+ratio_eficiencia = horas_semanales ÷ (horas_semanales + horas_huecos)</pre>
+  <p>La eficiencia es 100 % si el catedrático no tiene huecos (todas sus clases están pegadas). Es menor cuanto más tiempo pasa en campus sin clase.</p>
+
+  <h3>Por qué se ignoran las clases virtuales en los solapes de aula</h3>
+  <p>Cuando una clase tiene <code>VIRTUAL</code> en la columna AULA, el sistema entiende que no ocupa un espacio físico — se realiza por internet desde donde sea. Por lo tanto, dos clases virtuales al mismo tiempo no generan un solape de aula. Sí se reportan los solapes de catedrático en clases virtuales, porque el catedrático sigue sin poder estar en dos clases a la vez (aunque sean virtuales).</p>
+
+  <h3>Por qué se ignora el catedrático "P.D."</h3>
+  <p>Las clases asignadas a "P.D." (por definir) están a la espera de tener un catedrático real. El sistema las excluye de las validaciones de solape de catedrático y de sobrecarga/subutilización para no contar a "P.D." como si fuera un docente real.</p>
+
+  <h3>Limites y tolerancias del sistema</h3>
+  <table>
+    <thead><tr><th>Concepto</th><th>Valor</th></tr></thead>
+    <tbody>
+      <tr><td class="metrica">Tamaño máximo de archivo</td><td>50 MB</td></tr>
+      <tr><td class="metrica">Umbral de sobrecarga docente</td><td>40 h/semana</td></tr>
+      <tr><td class="metrica">Umbral de subutilización docente</td><td>4 h/semana</td></tr>
+      <tr><td class="metrica">Umbral de sección grande</td><td>30 alumnos</td></tr>
+      <tr><td class="metrica">Umbral de horario sospechoso</td><td>5 horas continuas</td></tr>
+      <tr><td class="metrica">Tarifa por hora por defecto</td><td>230 lempiras</td></tr>
+      <tr><td class="metrica">Semanas por pago por defecto</td><td>4</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ====== 12. GLOSARIO ====== -->
+<section class="cap">
+  <h2><span class="num">12</span>Glosario</h2>
+  <dl class="glosario">
+    <dt>Aula</dt>
+    <dd>Espacio físico (o virtual) donde se imparte una clase. Identificada por un código (102, LAB CAD, VIRTUAL, etc.).</dd>
+
+    <dt>Bloque horario</dt>
+    <dd>Período continuo de tiempo en un día específico dentro del cual ocurre una clase. Una clase puede tener varios bloques (típicamente dos o tres por semana).</dd>
+
+    <dt>Catedrático</dt>
+    <dd>Docente que imparte una o varias clases. Identificado por nombre completo. La etiqueta (NUEVO) indica que es la primera vez que aparece en la universidad.</dd>
+
+    <dt>Clase</dt>
+    <dd>Sinónimo de "sección". Un grupo concreto de una asignatura con un catedrático asignado y un horario.</dd>
+
+    <dt>Consolidada (hoja)</dt>
+    <dd>Hoja del Excel que repite las clases de todas las otras hojas. Habitualmente PREGRADO-IA o PROGRAMACIÓN GENERAL. El sistema la omite para evitar duplicados, salvo en la validación de consolidación.</dd>
+
+    <dt>Eficiencia docente</dt>
+    <dd>Porcentaje del tiempo en campus que un catedrático efectivamente da clase. 100 % = sin huecos entre clases. 50 % = la mitad del tiempo en campus es hueco.</dd>
+
+    <dt>Hora clase</dt>
+    <dd>Unidad de medida académica equivalente a 50 minutos reloj. El sistema convierte automáticamente entre minutos y horas clase.</dd>
+
+    <dt>Hueco</dt>
+    <dd>Tiempo entre dos clases consecutivas del mismo catedrático en el mismo día. Un hueco de 3 horas significa que el catedrático está en campus 3 horas sin dar clase.</dd>
+
+    <dt>Importación</dt>
+    <dd>Cada vez que se carga un archivo Excel al sistema. Genera una versión nueva de la programación; las anteriores se conservan en el historial.</dd>
+
+    <dt>Modalidad</dt>
+    <dd>Tipo de impartición: presencial, virtual o semipresencial.</dd>
+
+    <dt>Ocupación de aula</dt>
+    <dd>Porcentaje de la jornada teórica (84 h/semana) en el que un aula está ocupada por clases.</dd>
+
+    <dt>Período (PAC)</dt>
+    <dd>Período académico al que pertenece la programación. UJCV trabaja con tres PAC por año.</dd>
+
+    <dt>Sección</dt>
+    <dd>Grupo específico de una asignatura. Una asignatura puede tener varias secciones (A-T, B-T, C-T, etc.) con distintos catedráticos y horarios.</dd>
+
+    <dt>Solape</dt>
+    <dd>Conflicto entre dos clases que comparten recurso (misma aula o mismo catedrático) en horario que se cruza.</dd>
+  </dl>
+</section>
+
+<!-- ====== 13. SOLUCIÓN DE PROBLEMAS ====== -->
+<section class="cap">
+  <h2><span class="num">13</span>Resolución de problemas comunes</h2>
+  <p class="lead">Respuesta directa a las dudas más frecuentes.</p>
+
+  <h3>El sistema dice "Aún no hay datos cargados"</h3>
+  <p>No se ha cargado ningún Excel de programación en este período. Vaya a la sección <strong>Cargar</strong> y suba el archivo. En cuanto termine de procesarse, las demás secciones se llenan automáticamente.</p>
+
+  <h3>Cargué el Excel y el sistema dice "fallida"</h3>
+  <p>El archivo no se pudo procesar. Hay tres causas frecuentes:</p>
+  <ol>
+    <li><strong>El archivo no es <code>.xlsx</code></strong>. Si está en formato antiguo <code>.xls</code>, ábralo en Excel y guárdelo como <em>Libro de Excel (.xlsx)</em>. Otros formatos como <code>.ods</code> u <code>.csv</code> tampoco son compatibles.</li>
+    <li><strong>El archivo está dañado</strong>. Pruebe abriéndolo en Excel; si Excel reporta error, el archivo está corrupto y debe regenerarse.</li>
+    <li><strong>El archivo pesa más de 50 MB</strong>. Si trae filas vacías extra que infla el tamaño, ábralo en Excel, borre todas las filas vacías, guárdelo y vuelva a cargar.</li>
+  </ol>
+
+  <h3>El sistema dice que hay solapes de aula que no debería haber</h3>
+  <p>Verifique en el Excel que las dos clases reportadas realmente comparten aula y horario. A veces el sistema detecta un solape real que el ojo humano había pasado por alto. Si verifica que es un solape real, decida cuál clase mover y vuelva a cargar.</p>
+
+  <h3>Un catedrático aparece como "sobrecargado" pero su asignación está correcta</h3>
+  <p>El umbral por defecto es 40 h/semana. Si tiene más, el sistema lo reporta. No es necesariamente un error: puede ser un catedrático de tiempo completo con una carga real superior. Marque el problema como resuelto con una nota como "Catedrático de planta, 45 h es su carga normal".</p>
+
+  <h3>El archivo de pago muestra 0 lempiras en una clase</h3>
+  <p>Significa que esa clase no tiene declaradas ni horas presenciales ni horas totales. Revise la fila correspondiente en el Excel y complete las horas, luego vuelva a cargar.</p>
+
+  <h3>El total de ingresos de un catedrático no cuadra con lo que esperaba</h3>
+  <p>Verifique que:</p>
+  <ul>
+    <li>La <strong>tarifa por hora</strong> del formulario es la correcta (por defecto 230).</li>
+    <li>El número de <strong>semanas a pagar</strong> es el correcto (por defecto 4).</li>
+    <li>Todas las clases del catedrático tienen sus horas presenciales declaradas.</li>
+  </ul>
+  <p>Use la vista previa de la página de pagos para revisar antes de descargar.</p>
+
+  <h3>No puedo cerrar sesión</h3>
+  <p>Haga clic sobre su correo al pie del menú lateral izquierdo y seleccione "Cerrar sesión". Si la página queda colgada, cierre el navegador y vuelva a abrirlo; la sesión se cierra automáticamente al hacerlo.</p>
+
+  <h3>Olvidé mi contraseña</h3>
+  <p>Actualmente no hay flujo automático de recuperación. Contacte al equipo técnico para que reinicie su contraseña desde el panel de administración.</p>
+
+  <h3>Las cifras del panel no coinciden con las de validación</h3>
+  <p>Es posible que esté viendo problemas marcados como resueltos en validación, mientras el panel muestra solo los pendientes. Use la pestaña <strong>Todos</strong> de validación para ver el conteo completo.</p>
+
+  <div class="cierre">
+    <h3>Si nada de esto resuelve su problema</h3>
+    <p>Comuníquese con el equipo técnico. Describa <strong>qué estaba haciendo</strong>, <strong>qué esperaba que pasara</strong> y <strong>qué pasó en su lugar</strong>. Si puede, adjunte una captura de pantalla — eso acorta el diagnóstico considerablemente.</p>
+  </div>
+</section>
+
+</body>
+</html>

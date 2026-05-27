@@ -1,5 +1,15 @@
 import Link from "next/link";
 
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { agregarPorCatedratico, listarClasesUltimoPeriodo } from "@/lib/data";
 
 export const metadata = {
@@ -11,38 +21,36 @@ export default async function CatedraticosPage() {
   const docentes = agregarPorCatedratico(clases);
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-16">
-      <header className="border-b border-zinc-200 pb-6 dark:border-zinc-800">
-        <h1 className="text-3xl font-semibold tracking-tight">Catedráticos</h1>
-        <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-          {docentes.length} catedráticos en el período actual. Seleccione uno
-          para ver su horario detallado.
+    <div className="p-6 lg:p-8">
+      <header className="mb-6">
+        <h1 className="text-2xl font-semibold tracking-tight">Catedráticos</h1>
+        <p className="text-sm text-muted-foreground">
+          {docentes.length} catedráticos en el período actual.
         </p>
       </header>
 
       {docentes.length === 0 ? (
-        <p className="mt-8 text-sm text-zinc-600 dark:text-zinc-400">
-          Aún no se han cargado catedráticos.
-        </p>
+        <Card>
+          <div className="p-6 text-sm text-muted-foreground">
+            Aún no se han cargado catedráticos.
+          </div>
+        </Card>
       ) : (
-        <div className="mt-8 overflow-hidden rounded border border-zinc-200 dark:border-zinc-800">
-          <table className="w-full text-sm">
-            <thead className="bg-zinc-100 text-xs uppercase tracking-wider text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-              <tr>
-                <th className="px-4 py-2 text-left">Catedrático</th>
-                <th className="px-4 py-2 text-right">Clases</th>
-                <th className="px-4 py-2 text-right">Asignaturas</th>
-                <th className="px-4 py-2 text-right">H/sem</th>
-                <th className="px-4 py-2 text-left">Carreras</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-200 bg-white dark:divide-zinc-800 dark:bg-zinc-900">
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Catedrático</TableHead>
+                <TableHead className="text-right">Clases</TableHead>
+                <TableHead className="text-right">Asignaturas</TableHead>
+                <TableHead className="text-right">H/sem</TableHead>
+                <TableHead>Carreras</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {docentes.map((d) => (
-                <tr
-                  key={d.nombre}
-                  className="hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                >
-                  <td className="px-4 py-2">
+                <TableRow key={d.nombre}>
+                  <TableCell>
                     <Link
                       href={`/catedraticos/${encodeURIComponent(d.nombre)}`}
                       className="font-medium hover:underline"
@@ -50,29 +58,32 @@ export default async function CatedraticosPage() {
                       {d.nombre}
                     </Link>
                     {d.es_nuevo && (
-                      <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+                      <Badge
+                        variant="outline"
+                        className="ml-2 bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+                      >
                         Nuevo
-                      </span>
+                      </Badge>
                     )}
-                  </td>
-                  <td className="px-4 py-2 text-right tabular-nums">
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
                     {d.n_clases}
-                  </td>
-                  <td className="px-4 py-2 text-right tabular-nums">
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
                     {d.asignaturas_unicas}
-                  </td>
-                  <td className="px-4 py-2 text-right tabular-nums">
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
                     {d.horas_semanales.toFixed(1)}
-                  </td>
-                  <td className="px-4 py-2 text-xs text-zinc-600 dark:text-zinc-400">
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
                     {d.carreras.join(", ")}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </Card>
       )}
-    </main>
+    </div>
   );
 }

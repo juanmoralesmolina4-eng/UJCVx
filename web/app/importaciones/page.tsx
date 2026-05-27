@@ -1,9 +1,25 @@
 import Link from "next/link";
 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const metadata = {
-  title: "Historial de cargas — UJCVx",
+  title: "Historial — UJCVx",
 };
 
 interface ImportacionRow {
@@ -14,8 +30,17 @@ interface ImportacionRow {
   status: "pendiente" | "procesando" | "completada" | "fallida";
   error: string | null;
   created_at: string;
-  procesada_at: string | null;
 }
+
+const VARIANTE_STATUS: Record<
+  ImportacionRow["status"],
+  "default" | "secondary" | "destructive" | "outline"
+> = {
+  pendiente: "secondary",
+  procesando: "default",
+  completada: "default",
+  fallida: "destructive",
+};
 
 const COLOR_STATUS: Record<ImportacionRow["status"], string> = {
   pendiente: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300",
@@ -29,110 +54,111 @@ export default async function ImportacionesPage() {
 
   const { data, error } = await sb
     .from("importaciones")
-    .select("id, tipo, archivo, total_filas, status, error, created_at, procesada_at")
+    .select("id, tipo, archivo, total_filas, status, error, created_at")
     .order("created_at", { ascending: false })
     .limit(50);
 
   const importaciones = (data ?? []) as ImportacionRow[];
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-16">
-      <header className="border-b border-zinc-200 pb-6 dark:border-zinc-800">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Historial de cargas
-        </h1>
-        <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-          Registro completo de las importaciones realizadas con su estado
-          de procesamiento.
+    <div className="p-6 lg:p-8">
+      <header className="mb-6">
+        <h1 className="text-2xl font-semibold tracking-tight">Historial</h1>
+        <p className="text-sm text-muted-foreground">
+          Registro completo de las cargas realizadas.
         </p>
       </header>
 
       {error && (
-        <div className="mt-8 rounded border border-rose-300 bg-rose-50 p-4 text-sm dark:border-rose-900 dark:bg-rose-950/30">
-          <p className="font-medium text-rose-700 dark:text-rose-300">
-            Error al consultar
-          </p>
-          <p className="mt-1 text-zinc-600 dark:text-zinc-400">{error.message}</p>
-        </div>
+        <Card className="mb-4 border-destructive">
+          <CardContent className="pt-6 text-sm text-destructive">
+            {error.message}
+          </CardContent>
+        </Card>
       )}
 
-      {!error && importaciones.length === 0 && (
-        <div className="mt-8 rounded border border-zinc-200 bg-white p-6 text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-          Aún no se ha registrado ninguna importación. Cargue un archivo Excel
-          desde la sección <a href="/cargar" className="underline">Cargar</a>.
-        </div>
-      )}
-
-      {importaciones.length > 0 && (
-        <div className="mt-8 overflow-hidden rounded border border-zinc-200 dark:border-zinc-800">
-          <table className="w-full text-sm">
-            <thead className="bg-zinc-100 text-xs uppercase tracking-wider text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-              <tr>
-                <th className="px-4 py-2 text-left">Fecha</th>
-                <th className="px-4 py-2 text-left">Tipo</th>
-                <th className="px-4 py-2 text-left">Archivo</th>
-                <th className="px-4 py-2 text-right">Filas</th>
-                <th className="px-4 py-2 text-left">Estado</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-200 bg-white dark:divide-zinc-800 dark:bg-zinc-900">
+      {!error && importaciones.length === 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Sin registros</CardTitle>
+            <CardDescription>
+              Aún no se ha cargado ninguna programación. Vaya a la sección{" "}
+              <Link href="/cargar" className="underline">
+                Cargar
+              </Link>{" "}
+              para comenzar.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      ) : (
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Fecha</TableHead>
+                <TableHead>Archivo</TableHead>
+                <TableHead className="text-right">Filas</TableHead>
+                <TableHead>Estado</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {importaciones.map((imp) => (
-                <tr
-                  key={imp.id}
-                  className="hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                >
-                  <td className="whitespace-nowrap text-zinc-600 dark:text-zinc-400">
+                <TableRow key={imp.id} className="cursor-pointer">
+                  <TableCell className="whitespace-nowrap text-muted-foreground">
                     <Link
                       href={`/importaciones/${imp.id}`}
-                      className="block px-4 py-2"
+                      className="block py-1"
                     >
                       {new Date(imp.created_at).toLocaleString("es-HN")}
                     </Link>
-                  </td>
-                  <td className="uppercase text-xs text-zinc-500">
+                  </TableCell>
+                  <TableCell className="break-all text-xs">
                     <Link
                       href={`/importaciones/${imp.id}`}
-                      className="block px-4 py-2"
+                      className="block py-1"
                     >
-                      {imp.tipo}
+                      {nombreLimpio(imp.archivo)}
                     </Link>
-                  </td>
-                  <td className="break-all text-xs">
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
                     <Link
                       href={`/importaciones/${imp.id}`}
-                      className="block px-4 py-2"
-                    >
-                      {imp.archivo}
-                    </Link>
-                  </td>
-                  <td className="text-right tabular-nums">
-                    <Link
-                      href={`/importaciones/${imp.id}`}
-                      className="block px-4 py-2"
+                      className="block py-1"
                     >
                       {imp.total_filas ?? "—"}
                     </Link>
-                  </td>
-                  <td className="px-4 py-2">
-                    <Link href={`/importaciones/${imp.id}`} className="block">
-                      <span
-                        className={`rounded px-2 py-0.5 text-xs uppercase tracking-wider ${COLOR_STATUS[imp.status]}`}
+                  </TableCell>
+                  <TableCell>
+                    <Link
+                      href={`/importaciones/${imp.id}`}
+                      className="block py-1"
+                    >
+                      <Badge
+                        variant={VARIANTE_STATUS[imp.status]}
+                        className={COLOR_STATUS[imp.status]}
                       >
                         {imp.status}
-                      </span>
+                      </Badge>
                       {imp.error && (
                         <p className="mt-1 text-xs text-rose-600">
                           {imp.error}
                         </p>
                       )}
                     </Link>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </Card>
       )}
-    </main>
+    </div>
   );
+}
+
+function nombreLimpio(archivo: string): string {
+  const partes = archivo.split("/");
+  const nombre = partes[partes.length - 1];
+  const sinStamp = nombre.replace(/^[\d\-T:.Z]+__/, "");
+  return sinStamp.replace(/_/g, " ");
 }

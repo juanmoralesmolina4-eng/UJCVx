@@ -2,6 +2,17 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Upload,
+  FileSpreadsheet,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
+
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 import { subirExcel } from "./actions";
 
@@ -25,11 +36,17 @@ export function UploadForm() {
 
   function subir(archivo: File) {
     if (!archivo.name.toLowerCase().endsWith(".xlsx")) {
-      setEstado({ kind: "error", mensaje: "Solo se admiten archivos con extensión .xlsx" });
+      setEstado({
+        kind: "error",
+        mensaje: "Solo se admiten archivos con extensión .xlsx",
+      });
       return;
     }
     if (archivo.size > 50 * 1024 * 1024) {
-      setEstado({ kind: "error", mensaje: "El archivo excede el tamaño máximo de 50 MB" });
+      setEstado({
+        kind: "error",
+        mensaje: "El archivo excede el tamaño máximo de 50 MB",
+      });
       return;
     }
 
@@ -72,12 +89,12 @@ export function UploadForm() {
           const f = e.dataTransfer.files?.[0];
           if (f) subir(f);
         }}
-        className={[
-          "flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center transition-colors",
+        className={cn(
+          "flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed bg-card p-12 text-center transition-colors",
           dragOver
-            ? "border-zinc-900 bg-zinc-100 dark:border-zinc-100 dark:bg-zinc-800"
-            : "border-zinc-300 hover:border-zinc-400 dark:border-zinc-700 dark:hover:border-zinc-500",
-        ].join(" ")}
+            ? "border-foreground bg-accent"
+            : "border-border hover:border-foreground/50",
+        )}
       >
         <input
           type="file"
@@ -88,9 +105,18 @@ export function UploadForm() {
             if (f) subir(f);
           }}
         />
-        <p className="text-lg font-medium">Arrastre el archivo Excel</p>
-        <p className="mt-2 text-sm text-zinc-500">o haga clic para seleccionarlo</p>
-        <p className="mt-4 text-xs text-zinc-400">Formato .xlsx, tamaño máximo 50 MB.</p>
+        <div className="mb-4 rounded-full bg-muted p-3">
+          <Upload className="h-6 w-6 text-muted-foreground" />
+        </div>
+        <p className="text-base font-medium">
+          Arrastre el archivo Excel
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          o haga clic para seleccionarlo
+        </p>
+        <p className="mt-4 text-xs text-muted-foreground">
+          Formato .xlsx · tamaño máximo 50 MB
+        </p>
       </label>
 
       <EstadoCard estado={estado} />
@@ -103,62 +129,67 @@ function EstadoCard({ estado }: { estado: Estado }) {
 
   if (estado.kind === "subiendo") {
     return (
-      <div className="rounded border border-zinc-200 bg-white p-4 text-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <p className="text-zinc-600 dark:text-zinc-400">
-          Cargando y procesando <span className="font-medium">{estado.nombre}</span>…
-        </p>
-        <p className="mt-1 text-xs text-zinc-500">
-          El proceso puede tardar entre 5 y 10 segundos según el tamaño del archivo.
-        </p>
-      </div>
+      <Card>
+        <CardContent className="flex items-center gap-3 py-4">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          <div className="flex-1">
+            <p className="text-sm font-medium">Procesando {estado.nombre}</p>
+            <p className="text-xs text-muted-foreground">
+              Lectura del archivo y validaciones automáticas.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   if (estado.kind === "ok") {
     return (
-      <div className="rounded border border-emerald-300 bg-emerald-50 p-4 text-sm dark:border-emerald-900 dark:bg-emerald-950/30">
-        <p className="font-medium text-emerald-700 dark:text-emerald-300">
-          Procesamiento completado
-        </p>
-        <p className="mt-1 text-zinc-700 dark:text-zinc-400">
-          {estado.nombre} — importación{" "}
-          <code className="text-xs">{estado.importacionId.slice(0, 8)}</code>
-        </p>
-        {estado.totalClases !== undefined && (
-          <p className="mt-2 text-zinc-700 dark:text-zinc-400">
-            {estado.totalClases} secciones cargadas · {estado.totalProblemas ?? 0} problemas detectados.
-          </p>
-        )}
-        <p className="mt-3 flex gap-3 text-xs">
-          <a
-            href={`/importaciones/${estado.importacionId}`}
-            className="text-emerald-700 underline dark:text-emerald-300"
-          >
-            Ver detalle de la importación
-          </a>
-          <a
-            href="/validacion"
-            className="text-emerald-700 underline dark:text-emerald-300"
-          >
-            Ver validación
-          </a>
-          <a
-            href="/eficiencia"
-            className="text-emerald-700 underline dark:text-emerald-300"
-          >
-            Ver eficiencia
-          </a>
-        </p>
-      </div>
+      <Card className="border-emerald-200 dark:border-emerald-900">
+        <CardContent className="py-4">
+          <div className="flex items-start gap-3">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-medium">Procesamiento completado</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                <FileSpreadsheet className="mr-1 inline h-3 w-3" />
+                {estado.nombre}
+              </p>
+              {estado.totalClases !== undefined && (
+                <p className="mt-2 text-sm">
+                  {estado.totalClases} secciones cargadas ·{" "}
+                  {estado.totalProblemas ?? 0} problemas detectados
+                </p>
+              )}
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button asChild size="sm" variant="outline">
+                  <a href={`/importaciones/${estado.importacionId}`}>
+                    Ver detalle
+                  </a>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <a href="/validacion">Ver problemas</a>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <a href="/eficiencia">Ver eficiencia</a>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="rounded border border-rose-300 bg-rose-50 p-4 text-sm dark:border-rose-900 dark:bg-rose-950/30">
-      <p className="font-medium text-rose-700 dark:text-rose-300">
-        La carga no pudo completarse
-      </p>
-      <p className="mt-1 text-zinc-700 dark:text-zinc-400">{estado.mensaje}</p>
-    </div>
+    <Card className="border-rose-200 dark:border-rose-900">
+      <CardContent className="flex items-start gap-3 py-4">
+        <XCircle className="h-5 w-5 text-rose-600 dark:text-rose-400 mt-0.5" />
+        <div className="flex-1">
+          <p className="text-sm font-medium">La carga no pudo completarse</p>
+          <p className="mt-1 text-sm text-muted-foreground">{estado.mensaje}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

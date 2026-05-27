@@ -1,3 +1,9 @@
+import Link from "next/link";
+import { Upload } from "lucide-react";
+
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cargarDashboard } from "@/lib/dashboard";
 import type { ProblemaJSON } from "@/lib/dashboard";
 import { BotonResolver } from "./boton-resolver";
@@ -33,54 +39,71 @@ export default async function ValidacionPage({
   const mostrarResueltos = resueltos === "true";
 
   const data = await cargarDashboard();
-  if (!data) return <SinDatos />;
+  if (!data) {
+    return (
+      <div className="p-6 lg:p-8">
+        <h1 className="mb-6 text-2xl font-semibold tracking-tight">
+          Validación
+        </h1>
+        <Card>
+          <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
+            <div className="rounded-full bg-muted p-3">
+              <Upload className="h-6 w-6" />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Aún no se ha cargado ninguna programación.
+            </p>
+            <Link
+              href="/cargar"
+              className="inline-flex items-center gap-2 rounded bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90"
+            >
+              <Upload className="h-4 w-4" />
+              Cargar programación
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const problemasFiltrados = mostrarResueltos
     ? data.problemas
     : data.problemas.filter((p) => !p.resuelto);
-
   const grupos = agruparPorTipo(problemasFiltrados);
   const totalActivos = data.problemas.filter((p) => !p.resuelto).length;
   const totalResueltos = data.problemas.filter((p) => p.resuelto).length;
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-16">
-      <header className="border-b border-zinc-200 pb-6 dark:border-zinc-800">
-        <h1 className="text-3xl font-semibold tracking-tight">Validación</h1>
-        <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-          {totalActivos} problemas pendientes y {totalResueltos} resueltos en {data.totales.clases} secciones del último análisis.
-        </p>
-        <p className="mt-1 text-xs text-zinc-500">
-          Generado el {new Date(data.generado_at).toLocaleString("es-HN")}
+    <div className="p-6 lg:p-8">
+      <header className="mb-6">
+        <h1 className="text-2xl font-semibold tracking-tight">Validación</h1>
+        <p className="text-sm text-muted-foreground">
+          {totalActivos} pendientes, {totalResueltos} resueltos.
         </p>
       </header>
 
-      <section className="mt-8 grid gap-3 sm:grid-cols-3">
-        <Tarjeta label="Secciones" valor={data.totales.clases} />
-        <Tarjeta label="Catedráticos" valor={data.totales.catedraticos} />
-        <Tarjeta label="Aulas en uso" valor={data.totales.aulas} />
-      </section>
+      <Tabs value={mostrarResueltos ? "todos" : "pendientes"} className="mb-6">
+        <TabsList>
+          <TabsTrigger value="pendientes" asChild>
+            <Link href="/validacion">Pendientes ({totalActivos})</Link>
+          </TabsTrigger>
+          <TabsTrigger value="todos" asChild>
+            <Link href="/validacion?resueltos=true">
+              Todos ({data.problemas.length})
+            </Link>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
-      <section className="mt-8 flex items-center gap-3 text-sm">
-        <a
-          href="/validacion"
-          className={`rounded px-3 py-1.5 ${!mostrarResueltos ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900" : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"}`}
-        >
-          Pendientes ({totalActivos})
-        </a>
-        <a
-          href="/validacion?resueltos=true"
-          className={`rounded px-3 py-1.5 ${mostrarResueltos ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900" : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"}`}
-        >
-          Todos ({data.problemas.length})
-        </a>
-      </section>
-
-      <section className="mt-6 space-y-8">
+      <section className="space-y-6">
         {grupos.length === 0 ? (
-          <p className="text-zinc-600 dark:text-zinc-400">
-            {mostrarResueltos ? "No hay problemas registrados." : "No hay problemas pendientes."}
-          </p>
+          <Card>
+            <CardContent className="py-8 text-center text-sm text-muted-foreground">
+              {mostrarResueltos
+                ? "No hay problemas registrados."
+                : "No hay problemas pendientes."}
+            </CardContent>
+          </Card>
         ) : (
           grupos.map(([tipo, problemas]) => (
             <GrupoProblemas
@@ -91,7 +114,7 @@ export default async function ValidacionPage({
           ))
         )}
       </section>
-    </main>
+    </div>
   );
 }
 
@@ -112,83 +135,52 @@ function GrupoProblemas({
   problemas: ProblemaJSON[];
 }) {
   return (
-    <article>
-      <header className="mb-3 flex items-center justify-between border-b border-zinc-200 pb-2 dark:border-zinc-800">
-        <h2 className="text-lg font-semibold">{titulo}</h2>
-        <span className="text-sm text-zinc-500">{problemas.length}</span>
-      </header>
-      <ul className="space-y-2">
+    <Card>
+      <div className="flex items-center justify-between border-b px-4 py-3">
+        <h2 className="text-sm font-semibold">{titulo}</h2>
+        <Badge variant="outline">{problemas.length}</Badge>
+      </div>
+      <ul className="divide-y">
         {problemas.map((p, i) => (
           <li
             key={p.id ?? i}
-            className={`rounded border p-3 text-sm ${
-              p.resuelto
-                ? "border-zinc-200 bg-zinc-50 opacity-60 dark:border-zinc-800 dark:bg-zinc-950"
-                : "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900"
+            className={`flex items-start gap-3 p-4 text-sm ${
+              p.resuelto ? "bg-muted/30 opacity-60" : ""
             }`}
           >
-            <div className="flex items-start gap-2">
-              <span
-                className={`shrink-0 rounded px-2 py-0.5 text-xs uppercase tracking-wider ${COLOR_SEVERIDAD[p.severidad]}`}
-              >
-                {p.severidad}
-              </span>
-              <div className="flex-1">
-                <p
-                  className={`text-zinc-800 dark:text-zinc-200 ${p.resuelto ? "line-through" : ""}`}
-                >
-                  {p.descripcion}
+            <Badge
+              variant="outline"
+              className={`shrink-0 ${COLOR_SEVERIDAD[p.severidad]}`}
+            >
+              {p.severidad}
+            </Badge>
+            <div className="flex-1 space-y-1">
+              <p className={p.resuelto ? "line-through" : ""}>
+                {p.descripcion}
+              </p>
+              {p.referencias.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {p.referencias
+                    .map((r) => `${r.hoja} · fila ${r.fila}`)
+                    .join(" · ")}
                 </p>
-                {p.referencias.length > 0 && (
-                  <p className="mt-1 text-xs text-zinc-500">
-                    {p.referencias
-                      .map((r) => `${r.hoja} · fila ${r.fila}`)
-                      .join(" · ")}
-                  </p>
-                )}
-                {p.resuelto && p.nota_resolucion && (
-                  <p className="mt-1 text-xs italic text-emerald-700 dark:text-emerald-300">
-                    Nota: {p.nota_resolucion}
-                  </p>
-                )}
-              </div>
-              {p.id && (
-                <BotonResolver
-                  id={p.id}
-                  resuelto={p.resuelto ?? false}
-                  notaActual={p.nota_resolucion ?? ""}
-                />
+              )}
+              {p.resuelto && p.nota_resolucion && (
+                <p className="text-xs italic text-emerald-700 dark:text-emerald-300">
+                  Nota: {p.nota_resolucion}
+                </p>
               )}
             </div>
+            {p.id && (
+              <BotonResolver
+                id={p.id}
+                resuelto={p.resuelto ?? false}
+                notaActual={p.nota_resolucion ?? ""}
+              />
+            )}
           </li>
         ))}
       </ul>
-    </article>
-  );
-}
-
-function Tarjeta({ label, valor }: { label: string; valor: number }) {
-  return (
-    <div className="rounded border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-      <p className="text-xs uppercase tracking-widest text-zinc-500">{label}</p>
-      <p className="mt-1 text-3xl font-semibold">{valor}</p>
-    </div>
-  );
-}
-
-function SinDatos() {
-  return (
-    <main className="mx-auto max-w-3xl px-6 py-16">
-      <h1 className="text-3xl font-semibold tracking-tight">Validación</h1>
-      <div className="mt-8 rounded border border-amber-300 bg-amber-50 p-6 text-sm dark:border-amber-900 dark:bg-amber-950/30">
-        <p className="font-medium text-amber-800 dark:text-amber-200">
-          Aún no se ha cargado ninguna programación
-        </p>
-        <p className="mt-2 text-zinc-700 dark:text-zinc-400">
-          Cargue el archivo Excel desde la sección{" "}
-          <a href="/cargar" className="underline">Cargar</a> para iniciar el análisis.
-        </p>
-      </div>
-    </main>
+    </Card>
   );
 }

@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { marcarProblema } from "./actions";
 
 interface Props {
@@ -31,54 +33,59 @@ export function BotonResolver({ id, resuelto, notaActual }: Props) {
 
   if (resuelto) {
     return (
-      <button
-        onClick={() => aplicar(false)}
+      <Button
+        size="sm"
+        variant="outline"
         disabled={isPending}
-        className="shrink-0 rounded border border-zinc-200 px-2 py-1 text-xs text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
+        onClick={() => aplicar(false)}
       >
         Reabrir
-      </button>
+      </Button>
     );
   }
 
   if (!editando) {
     return (
-      <button
+      <Button
+        size="sm"
+        variant="outline"
+        className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-300"
         onClick={() => setEditando(true)}
-        className="shrink-0 rounded border border-emerald-300 bg-emerald-50 px-2 py-1 text-xs text-emerald-700 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-300"
       >
         Resolver
-      </button>
+      </Button>
     );
   }
 
   return (
     <div className="flex shrink-0 flex-col gap-2">
-      <input
+      <Input
         autoFocus
         type="text"
         placeholder="Nota (opcional)"
         value={nota}
         onChange={(e) => setNota(e.target.value)}
-        className="w-48 rounded border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-800"
+        className="w-48 text-xs"
       />
       <div className="flex gap-2">
-        <button
-          onClick={() => aplicar(true, nota || undefined)}
+        <Button
+          size="sm"
           disabled={isPending}
-          className="flex-1 rounded bg-emerald-600 px-2 py-1 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+          onClick={() => aplicar(true, nota || undefined)}
+          className="flex-1"
         >
           {isPending ? "..." : "Guardar"}
-        </button>
-        <button
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
           onClick={() => {
             setEditando(false);
             setNota(notaActual);
           }}
-          className="rounded px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
         >
           Cancelar
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -1,12 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import { Download } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const PAGOS = [
-  { numero: 1, label: "Primer pago" },
-  { numero: 2, label: "Segundo pago" },
-  { numero: 3, label: "Tercer pago" },
-  { numero: 4, label: "Cuarto pago" },
+  { numero: "1", label: "Primer pago" },
+  { numero: "2", label: "Segundo pago" },
+  { numero: "3", label: "Tercer pago" },
+  { numero: "4", label: "Cuarto pago" },
 ];
 
 const CAMPUS = [
@@ -21,7 +33,7 @@ const PERIODOS = [
 ];
 
 export function FormularioPago() {
-  const [numero, setNumero] = useState(1);
+  const [numero, setNumero] = useState("1");
   const [semanas, setSemanas] = useState(4);
   const [tarifa, setTarifa] = useState(230);
   const [campus, setCampus] = useState("TEGUCIGALPA");
@@ -32,7 +44,7 @@ export function FormularioPago() {
     setIsPending(true);
     try {
       const params = new URLSearchParams({
-        numero: numero.toString(),
+        numero,
         semanas: semanas.toString(),
         tarifa: tarifa.toString(),
         campus,
@@ -59,102 +71,90 @@ export function FormularioPago() {
   }
 
   return (
-    <div className="rounded border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Campo label="Número de pago">
-          <select
-            value={numero}
-            onChange={(e) => setNumero(Number(e.target.value))}
-            className="w-full rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
-          >
-            {PAGOS.map((p) => (
-              <option key={p.numero} value={p.numero}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-        </Campo>
+        <div className="space-y-1.5">
+          <Label htmlFor="numero">Número de pago</Label>
+          <Select value={numero} onValueChange={setNumero}>
+            <SelectTrigger id="numero">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PAGOS.map((p) => (
+                <SelectItem key={p.numero} value={p.numero}>
+                  {p.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Campo label="Campus">
-          <select
-            value={campus}
-            onChange={(e) => setCampus(e.target.value)}
-            className="w-full rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
-          >
-            {CAMPUS.map((c) => (
-              <option key={c.codigo} value={c.codigo}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-        </Campo>
+        <div className="space-y-1.5">
+          <Label htmlFor="campus">Campus</Label>
+          <Select value={campus} onValueChange={setCampus}>
+            <SelectTrigger id="campus">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CAMPUS.map((c) => (
+                <SelectItem key={c.codigo} value={c.codigo}>
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Campo label="Periodo">
-          <select
-            value={periodo}
-            onChange={(e) => setPeriodo(e.target.value)}
-            className="w-full rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
-          >
-            {PERIODOS.map((p) => (
-              <option key={p.codigo} value={p.codigo}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-        </Campo>
+        <div className="space-y-1.5">
+          <Label htmlFor="periodo">Período</Label>
+          <Select value={periodo} onValueChange={setPeriodo}>
+            <SelectTrigger id="periodo">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PERIODOS.map((p) => (
+                <SelectItem key={p.codigo} value={p.codigo}>
+                  {p.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Campo label="Semanas a pagar">
-          <input
+        <div className="space-y-1.5">
+          <Label htmlFor="semanas">Semanas a pagar</Label>
+          <Input
+            id="semanas"
             type="number"
             min={1}
             max={16}
             value={semanas}
             onChange={(e) => setSemanas(Math.max(1, Number(e.target.value)))}
-            className="w-full rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
           />
-        </Campo>
+        </div>
 
-        <Campo label="Tarifa por hora (L)">
-          <input
+        <div className="space-y-1.5">
+          <Label htmlFor="tarifa">Tarifa por hora (L)</Label>
+          <Input
+            id="tarifa"
             type="number"
             min={0}
             value={tarifa}
             onChange={(e) => setTarifa(Math.max(0, Number(e.target.value)))}
-            className="w-full rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
           />
-        </Campo>
+        </div>
       </div>
 
-      <div className="mt-6 flex items-center justify-between">
-        <p className="text-xs text-zinc-500">
+      <div className="flex items-center justify-between border-t pt-4">
+        <p className="text-xs text-muted-foreground">
           Las deducciones (IHSS, UJCV, embargo, ACH) se generan en cero y
           deben completarse manualmente en el archivo descargado.
         </p>
-        <button
-          onClick={descargar}
-          disabled={isPending}
-          className="rounded bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-        >
-          {isPending ? "Generando…" : "Descargar archivo"}
-        </button>
+        <Button onClick={descargar} disabled={isPending}>
+          <Download className="mr-2 h-4 w-4" />
+          {isPending ? "Generando…" : "Descargar"}
+        </Button>
       </div>
     </div>
-  );
-}
-
-function Campo({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block">
-      <span className="block text-xs uppercase tracking-widest text-zinc-500">
-        {label}
-      </span>
-      <div className="mt-1">{children}</div>
-    </label>
   );
 }

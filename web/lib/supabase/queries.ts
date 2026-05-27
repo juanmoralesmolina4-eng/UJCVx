@@ -79,6 +79,19 @@ export async function cargarDashboardDesdeSupabase(): Promise<DashboardData | nu
     .select("id, tipo, severidad, descripcion, referencias, extra, resuelto, nota_resolucion")
     .eq("corrida_id", corrida.id);
 
+  // Última importación del mismo periodo — evita duplicación cuando un Excel
+  // se procesó varias veces (cada corrida acumula clases nuevas).
+  const { data: ultimaImp } = await sb
+    .from("importaciones")
+    .select("id")
+    .eq("periodo_id", corrida.periodo_id)
+    .eq("tipo", "programacion")
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  const importacionId = ultimaImp?.[0]?.id;
+  if (!importacionId) return null;
+
   const { data: clasesRaw } = await sb
     .from("clases")
     .select(
@@ -87,7 +100,7 @@ export async function cargarDashboardDesdeSupabase(): Promise<DashboardData | nu
        horas_presenciales, horas_asincronicas, horas_totales,
        bloques_horarios (dia, inicio_min, fin_min)`,
     )
-    .eq("periodo_id", corrida.periodo_id);
+    .eq("importacion_id", importacionId);
 
   const clases = (clasesRaw ?? []) as ClaseRow[];
   const problemas: ProblemaJSON[] = (problemasRaw ?? []).map(

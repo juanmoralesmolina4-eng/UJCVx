@@ -61,12 +61,18 @@ export async function subirExcel(formData: FormData): Promise<ResultadoSubida> {
 
   let periodoId: string | undefined = periodo?.id;
   if (!periodoId) {
-    const { data: nuevo } = await sb
+    const { data: nuevo, error: errPeriodo } = await sb
       .from("periodos")
       .insert({ codigo: "2026-II", anio: 2026, numero: 2 })
       .select("id")
       .single();
-    periodoId = nuevo?.id;
+    if (errPeriodo || !nuevo?.id) {
+      return {
+        ok: false,
+        mensaje: `No se pudo registrar el período: ${errPeriodo?.message ?? "sin detalle"}`,
+      };
+    }
+    periodoId = nuevo.id;
   }
 
   const { data: imp, error: impError } = await sb

@@ -79,13 +79,15 @@ export async function cargarDashboardDesdeSupabase(): Promise<DashboardData | nu
     .select("id, tipo, severidad, descripcion, referencias, extra, resuelto, nota_resolucion")
     .eq("corrida_id", corrida.id);
 
-  // Última importación del mismo periodo — evita duplicación cuando un Excel
-  // se procesó varias veces (cada corrida acumula clases nuevas).
+  // Última importación COMPLETADA del mismo periodo — evita duplicación
+  // cuando un Excel se procesó varias veces. Filtrar por status evita que
+  // una importación fallida o aún en proceso oculte los datos buenos.
   const { data: ultimaImp } = await sb
     .from("importaciones")
     .select("id")
     .eq("periodo_id", corrida.periodo_id)
     .eq("tipo", "programacion")
+    .eq("status", "completada")
     .order("created_at", { ascending: false })
     .limit(1);
 

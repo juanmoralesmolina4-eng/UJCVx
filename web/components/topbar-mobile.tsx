@@ -62,10 +62,15 @@ export function TopbarMobile({ correoUsuario }: { correoUsuario?: string }) {
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <a href="/auth/signout">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Cerrar sesión
-                </a>
+                <form action="/auth/signout" method="POST">
+                  <button
+                    type="submit"
+                    className="flex w-full cursor-pointer items-center"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Cerrar sesión
+                  </button>
+                </form>
               </DropdownMenuItem>
             </>
           )}

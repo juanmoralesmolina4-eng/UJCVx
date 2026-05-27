@@ -126,10 +126,15 @@ export function Sidebar({ correoUsuario }: { correoUsuario?: string }) {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <a href="/auth/signout" className="cursor-pointer">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Cerrar sesión
-                </a>
+                <form action="/auth/signout" method="POST">
+                  <button
+                    type="submit"
+                    className="flex w-full cursor-pointer items-center"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Cerrar sesión
+                  </button>
+                </form>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

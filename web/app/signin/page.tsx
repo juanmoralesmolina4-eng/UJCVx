@@ -21,7 +21,12 @@ export default async function SigninPage({
   } = await sb.auth.getUser();
 
   if (user) {
-    redirect(redirectTo || "/");
+    // Solo aceptar paths internos (mismo guard que las actions del signin)
+    const destino =
+      redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
+        ? redirectTo
+        : "/";
+    redirect(destino);
   }
 
   return (

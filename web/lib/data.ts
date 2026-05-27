@@ -33,10 +33,13 @@ export interface ClaseDB {
 
 async function _ultimaImportacionId(): Promise<string | null> {
   const sb = createSupabaseAdminClient();
+  // Solo importaciones COMPLETADAS — si la última falló o está en proceso,
+  // las páginas de catedráticos/aulas/pagos quedarían vacías sin razón.
   const { data } = await sb
     .from("importaciones")
     .select("id")
     .eq("tipo", "programacion")
+    .eq("status", "completada")
     .order("created_at", { ascending: false })
     .limit(1);
   return data?.[0]?.id ?? null;

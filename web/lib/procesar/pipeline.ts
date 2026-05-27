@@ -149,36 +149,56 @@ async function insertarClases(
 ): Promise<void> {
   if (clases.length === 0) return;
 
-  const filasClases = clases.map((c) => ({
-    periodo_id: periodoId,
-    campus_codigo: N.campusDeSeccion(c.seccion),
-    importacion_id: importacionId,
-    hoja_origen: c.hoja,
-    fila_origen: c.fila,
-    catedratico_nombre: c.catedratico || "SIN ASIGNAR",
-    catedratico_es_nuevo: c.catedraticoEsNuevo,
-    codigo: c.codigo || "?",
-    codigos_alternos: c.codigosAlternos.length ? c.codigosAlternos : null,
-    asignatura_nombre: c.asignatura || "?",
-    carrera_codigo: c.carrera || null,
-    alumnos: c.alumnos,
-    modalidad: N.modalidadCanonica(c.modalidad),
-    aula_texto: c.aula || "",
-    seccion: c.seccion || "?",
-    horas_presenciales: c.horasPresenciales,
-    horas_asincronicas: c.horasAsincronicas,
-    horas_totales: c.horasTotales,
-    observaciones: c.observaciones || "",
+  // Generamos un identificador único por fila ANTES de insertar, así
+  // sabemos exactamente a qué `Clase` corresponde cada `id` que devuelve
+  // Supabase (no podemos confiar en que el orden de retorno sea el mismo
+  // que el orden de inserción).
+  const filasConRef = clases.map((c, i) => ({
+    indice: i,
+    fila: {
+      periodo_id: periodoId,
+      campus_codigo: N.campusDeSeccion(c.seccion),
+      importacion_id: importacionId,
+      hoja_origen: c.hoja,
+      fila_origen: c.fila,
+      catedratico_nombre: c.catedratico || "SIN ASIGNAR",
+      catedratico_es_nuevo: c.catedraticoEsNuevo,
+      codigo: c.codigo || "?",
+      codigos_alternos: c.codigosAlternos.length ? c.codigosAlternos : null,
+      asignatura_nombre: c.asignatura || "?",
+      carrera_codigo: c.carrera || null,
+      alumnos: c.alumnos,
+      modalidad: N.modalidadCanonica(c.modalidad),
+      aula_texto: c.aula || "",
+      seccion: c.seccion || "?",
+      horas_presenciales: c.horasPresenciales,
+      horas_asincronicas: c.horasAsincronicas,
+      horas_totales: c.horasTotales,
+      observaciones: c.observaciones || "",
+    },
   }));
 
-  const lotes = chunk(filasClases, 100);
-  const insertadas: { id: string }[] = [];
-  for (let i = 0; i < lotes.length; i++) {
-    const { data } = await sb
+  // Insertamos en lotes y reasociamos los IDs devueltos a cada Clase original
+  // usando (hoja_origen, fila_origen) como clave — esos campos son únicos
+  // dentro de una importación.
+  const idPorRef = new Map<string, string>();
+  const lotes = chunk(filasConRef, 100);
+  for (const lote of lotes) {
+    const { data, error } = await sb
       .from("clases")
-      .insert(lotes[i])
-      .select("id");
-    if (data) insertadas.push(...data);
+      .insert(lote.map((l) => l.fila))
+      .select("id, hoja_origen, fila_origen");
+    if (error) {
+      throw new Error(`Insert de clases falló: ${error.message}`);
+    }
+    if (!data || data.length !== lote.length) {
+      throw new Error(
+        `Insert de clases devolvió ${data?.length ?? 0} filas, esperaba ${lote.length}`,
+      );
+    }
+    for (const fila of data) {
+      idPorRef.set(`${fila.hoja_origen}::${fila.fila_origen}`, fila.id);
+    }
   }
 
   const filasBloques: {
@@ -187,10 +207,10 @@ async function insertarClases(
     inicio_min: number;
     fin_min: number;
   }[] = [];
-  for (let i = 0; i < insertadas.length; i++) {
-    const claseId = insertadas[i].id;
-    const src = clases[i];
-    for (const b of src.bloques) {
+  for (const c of clases) {
+    const claseId = idPorRef.get(`${c.hoja}::${c.fila}`);
+    if (!claseId) continue;
+    for (const b of c.bloques) {
       filasBloques.push({
         clase_id: claseId,
         dia: b.dia,
@@ -214,8 +234,5 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return out;
 }
 
-function _unusedProblema(_: Problema) {
-  // Mantiene la importación de Problema viva para que el tipo se exporte
-  return _;
-}
-void _unusedProblema;
+// Mantiene la importación de Problema viva para que el tipo se exporte
+export type { Problema };

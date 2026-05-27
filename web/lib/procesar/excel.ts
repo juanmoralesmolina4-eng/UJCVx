@@ -22,7 +22,15 @@ export async function leerExcel(
 ): Promise<Clase[]> {
   const { omitirConsolidadas = true } = opciones;
 
-  const wb = XLSX.read(buffer, { type: "array", cellDates: false });
+  let wb: XLSX.WorkBook;
+  try {
+    wb = XLSX.read(buffer, { type: "array", cellDates: false });
+  } catch (e) {
+    const detalle = e instanceof Error ? e.message : String(e);
+    throw new Error(
+      `El archivo no es un Excel (.xlsx) válido. Detalle: ${detalle}`,
+    );
+  }
 
   const hojas = wb.SheetNames;
   const hojasALeer =

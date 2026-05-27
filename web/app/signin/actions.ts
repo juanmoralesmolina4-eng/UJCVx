@@ -33,10 +33,20 @@ async function clienteAuth() {
   );
 }
 
+/** Solo permite redirects internos (paths que empiezan con `/`). Evita que
+ *  un atacante envíe `?redirect=https://malicioso.com` y robe al usuario. */
+function destinoSeguro(valor: string): string {
+  // Acepta solo paths absolutos internos. Rechaza `//evil.com`, `https://...`, etc.
+  if (valor.startsWith("/") && !valor.startsWith("//")) {
+    return valor;
+  }
+  return "/";
+}
+
 export async function ingresar(formData: FormData): Promise<ResultadoAuth> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const redirectTo = String(formData.get("redirectTo") ?? "/");
+  const redirectTo = destinoSeguro(String(formData.get("redirectTo") ?? "/"));
 
   if (!email || !email.includes("@")) {
     return { ok: false, mensaje: "Correo no válido" };
@@ -58,7 +68,7 @@ export async function ingresar(formData: FormData): Promise<ResultadoAuth> {
 export async function crearCuenta(formData: FormData): Promise<ResultadoAuth> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const redirectTo = String(formData.get("redirectTo") ?? "/");
+  const redirectTo = destinoSeguro(String(formData.get("redirectTo") ?? "/"));
 
   if (!email || !email.includes("@")) {
     return { ok: false, mensaje: "Correo no válido" };

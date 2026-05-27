@@ -10,7 +10,6 @@ import { createServerClient } from "@supabase/ssr";
 
 const RUTAS_PUBLICAS = [
   "/signin",
-  "/auth/callback",
 ];
 
 export async function proxy(request: NextRequest) {

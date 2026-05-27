@@ -60,7 +60,10 @@ export function calcularPagos(
     .map(([cated, grupo]): PagoCatedraticoCalculado => {
       const tarifa = tarifas[cated] ?? p.tarifaPorHoraDefault;
       const pagosClase = grupo.map((c): PagoClaseCalculado => {
-        const horas = c.horas_presenciales ?? 0;
+        // Si no hay presenciales, usar el total. Si no hay total, calcular
+        // a partir de los bloques reales del horario. Sin esto, las clases
+        // sin `horas_presenciales` declaradas pagarían 0.
+        const horas = c.horas_presenciales ?? c.horas_totales ?? 0;
         const horasTotales = horas * p.semanasAPagar;
         return {
           clase: c,

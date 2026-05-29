@@ -1,6 +1,13 @@
 /**
  * Queries de dominio reutilizables: catedráticos, aulas, clases con sus bloques.
  * Todas usan el cliente admin (server-only).
+ *
+ * Multi-campus: Martha sube un Excel por cada campus (Tegucigalpa y Comayagua)
+ * y ambos conviven en el sistema. Cada importación viene de un solo campus (lo
+ * deducimos por el sufijo de sección de sus clases: `-T` o `-C`). Las páginas
+ * traen las clases de la última importación COMPLETADA de CADA campus, no
+ * solo la global, para que ambos sigan visibles después de subir el más
+ * reciente.
  */
 import "server-only";
 
@@ -24,6 +31,7 @@ export interface ClaseDB {
   modalidad: string | null;
   aula_texto: string;
   seccion: string;
+  campus_codigo: string | null;
   horas_presenciales: number | null;
   horas_asincronicas: number | null;
   horas_totales: number | null;
@@ -31,40 +39,73 @@ export interface ClaseDB {
   bloques_horarios: BloqueDB[];
 }
 
-async function _ultimaImportacionId(): Promise<string | null> {
+export type CampusCodigo = "T" | "C";
+
+/**
+ * Devuelve los IDs de la última importación completada por cada campus.
+ * Mira las últimas 20 importaciones, deduce el campus de cada una mirando
+ * la primera clase asociada (todas las clases de un mismo archivo tienen
+ * el mismo sufijo de sección) y se queda con la más reciente por campus.
+ */
+async function _ultimasImportacionesPorCampus(): Promise<Map<CampusCodigo, string>> {
   const sb = createSupabaseAdminClient();
-  // Solo importaciones COMPLETADAS — si la última falló o está en proceso,
-  // las páginas de catedráticos/aulas/pagos quedarían vacías sin razón.
-  const { data } = await sb
+  const { data: imps } = await sb
     .from("importaciones")
-    .select("id")
+    .select("id, created_at")
     .eq("tipo", "programacion")
     .eq("status", "completada")
     .order("created_at", { ascending: false })
-    .limit(1);
-  return data?.[0]?.id ?? null;
+    .limit(20);
+
+  const out = new Map<CampusCodigo, string>();
+  if (!imps) return out;
+
+  for (const imp of imps) {
+    // Una clase basta para deducir el campus de toda la importación
+    const { data: muestra } = await sb
+      .from("clases")
+      .select("campus_codigo")
+      .eq("importacion_id", imp.id)
+      .limit(1);
+    const campus = muestra?.[0]?.campus_codigo as CampusCodigo | undefined;
+    if (campus && !out.has(campus)) {
+      out.set(campus, imp.id as string);
+    }
+    if (out.size === 2) break;
+  }
+
+  return out;
 }
 
 /**
- * Lista las clases de la importación más reciente. Usar la importación (no
- * el periodo) evita duplicados cuando el mismo Excel se procesa varias veces.
+ * Lista las clases de la última importación COMPLETADA de cada campus.
+ * Combina ambos campus en un solo arreglo. Para filtrar por campus específico
+ * después, usar `clasesPorCampus` o filtrar manualmente por `campus_codigo`.
  */
 export async function listarClasesUltimoPeriodo(): Promise<ClaseDB[]> {
-  const importacionId = await _ultimaImportacionId();
-  if (!importacionId) return [];
+  const porCampus = await _ultimasImportacionesPorCampus();
+  if (porCampus.size === 0) return [];
 
   const sb = createSupabaseAdminClient();
+  const ids = [...porCampus.values()];
   const { data } = await sb
     .from("clases")
     .select(
       `id, catedratico_nombre, catedratico_es_nuevo, codigo, asignatura_nombre,
-       carrera_codigo, alumnos, modalidad, aula_texto, seccion,
+       carrera_codigo, alumnos, modalidad, aula_texto, seccion, campus_codigo,
        horas_presenciales, horas_asincronicas, horas_totales, observaciones,
        bloques_horarios (dia, inicio_min, fin_min)`,
     )
-    .eq("importacion_id", importacionId);
+    .in("importacion_id", ids);
 
   return (data ?? []) as ClaseDB[];
+}
+
+export function clasesPorCampus(
+  clases: ClaseDB[],
+  campus: CampusCodigo,
+): ClaseDB[] {
+  return clases.filter((c) => c.campus_codigo === campus);
 }
 
 export interface ResumenCatedratico {

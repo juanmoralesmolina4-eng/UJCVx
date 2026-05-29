@@ -61,6 +61,14 @@ export async function procesarImportacion(
       clasesConsolidacion,
     );
 
+    // Como convención, cada archivo viene de un solo campus. Lo deducimos
+    // del sufijo de sección de la primera clase para etiquetar la
+    // importación y la corrida.
+    const campusCodigo =
+      clasesValidacion.length > 0
+        ? N.campusDeSeccion(clasesValidacion[0].seccion)
+        : null;
+
     // Borra clases previas de esta importación (idempotencia)
     await sb.from("clases").delete().eq("importacion_id", importacionId);
 
@@ -80,6 +88,7 @@ export async function procesarImportacion(
       .from("corridas_validacion")
       .insert({
         periodo_id: imp.periodo_id,
+        campus_codigo: campusCodigo,
         total_clases: clasesValidacion.length,
         total_problemas: problemas.length,
         resumen,
@@ -112,6 +121,7 @@ export async function procesarImportacion(
       .from("importaciones")
       .update({
         status: "completada",
+        campus_codigo: campusCodigo,
         total_filas: clasesValidacion.length,
         procesada_at: new Date().toISOString(),
         error: null,

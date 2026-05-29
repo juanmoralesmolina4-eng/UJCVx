@@ -1,9 +1,9 @@
 /**
  * Queries tipadas contra Supabase.
  *
- * Estas funciones devuelven el mismo shape que `lib/dashboard.ts` para que el
- * resto del código no se entere de la fuente. Cuando hay datos en Supabase,
- * se usan; cuando no, se cae al JSON local.
+ * Multi-campus: combina las últimas importaciones COMPLETADAS de cada campus
+ * (Tegucigalpa y Comayagua). Las métricas y problemas mostrados en el
+ * dashboard suman datos de ambos campus si están ambos cargados.
  */
 import { createSupabaseAdminClient } from "./admin";
 import type {
@@ -15,6 +15,7 @@ import type {
 } from "@/lib/dashboard";
 
 type DiaSemana = "LUN" | "MAR" | "MIE" | "JUE" | "VIE" | "SAB" | "DOM";
+type CampusCodigo = "T" | "C";
 
 interface BloqueRow {
   dia: DiaSemana;
@@ -32,6 +33,7 @@ interface ClaseRow {
   modalidad: string | null;
   aula_texto: string;
   seccion: string;
+  campus_codigo: string | null;
   horas_presenciales: number | null;
   horas_asincronicas: number | null;
   horas_totales: number | null;
@@ -57,52 +59,101 @@ interface CorridaRow {
   resumen: Record<string, number> | null;
 }
 
-/**
- * Trae la última corrida + sus problemas + las clases más recientes del
- * mismo periodo. Calcula métricas on-the-fly desde las clases.
- */
-export async function cargarDashboardDesdeSupabase(): Promise<DashboardData | null> {
+async function _ultimasImportacionesPorCampus(): Promise<
+  Map<CampusCodigo, { id: string; periodo_id: string }>
+> {
   const sb = createSupabaseAdminClient();
-
-  const { data: corridas, error: errCor } = await sb
-    .from("corridas_validacion")
-    .select("id, created_at, total_clases, total_problemas, resumen, periodo_id")
-    .order("created_at", { ascending: false })
-    .limit(1);
-
-  if (errCor || !corridas || corridas.length === 0) return null;
-
-  const corrida = corridas[0] as CorridaRow & { periodo_id: string };
-
-  const { data: problemasRaw } = await sb
-    .from("problemas")
-    .select("id, tipo, severidad, descripcion, referencias, extra, resuelto, nota_resolucion")
-    .eq("corrida_id", corrida.id);
-
-  // Última importación COMPLETADA del mismo periodo — evita duplicación
-  // cuando un Excel se procesó varias veces. Filtrar por status evita que
-  // una importación fallida o aún en proceso oculte los datos buenos.
-  const { data: ultimaImp } = await sb
+  const { data: imps } = await sb
     .from("importaciones")
-    .select("id")
-    .eq("periodo_id", corrida.periodo_id)
+    .select("id, periodo_id, campus_codigo")
     .eq("tipo", "programacion")
     .eq("status", "completada")
     .order("created_at", { ascending: false })
-    .limit(1);
+    .limit(20);
 
-  const importacionId = ultimaImp?.[0]?.id;
-  if (!importacionId) return null;
+  const out = new Map<CampusCodigo, { id: string; periodo_id: string }>();
+  if (!imps) return out;
+
+  for (const imp of imps) {
+    let campus = imp.campus_codigo as CampusCodigo | null;
+    // Fallback para importaciones viejas que no tienen campus_codigo guardado
+    if (!campus) {
+      const { data: muestra } = await sb
+        .from("clases")
+        .select("campus_codigo")
+        .eq("importacion_id", imp.id)
+        .limit(1);
+      campus = (muestra?.[0]?.campus_codigo as CampusCodigo | undefined) ?? null;
+    }
+    if (campus && !out.has(campus)) {
+      out.set(campus, { id: imp.id as string, periodo_id: imp.periodo_id as string });
+    }
+    if (out.size === 2) break;
+  }
+
+  return out;
+}
+
+async function _ultimasCorridasPorCampus(): Promise<
+  Map<CampusCodigo, CorridaRow>
+> {
+  const sb = createSupabaseAdminClient();
+  const { data: corridas } = await sb
+    .from("corridas_validacion")
+    .select("id, created_at, total_clases, total_problemas, resumen, campus_codigo")
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  const out = new Map<CampusCodigo, CorridaRow>();
+  if (!corridas) return out;
+
+  for (const c of corridas) {
+    const campus = c.campus_codigo as CampusCodigo | null;
+    if (campus && !out.has(campus)) {
+      out.set(campus, c as CorridaRow);
+    }
+    if (out.size === 2) break;
+  }
+
+  // Fallback: si ninguna corrida tiene campus_codigo (corridas viejas pre-fix),
+  // devolvemos al menos la más reciente bajo un campus dummy para no quedarnos
+  // con dashboard vacío.
+  if (out.size === 0 && corridas.length > 0) {
+    out.set("T", corridas[0] as CorridaRow);
+  }
+
+  return out;
+}
+
+export async function cargarDashboardDesdeSupabase(): Promise<DashboardData | null> {
+  const sb = createSupabaseAdminClient();
+
+  const corridasPorCampus = await _ultimasCorridasPorCampus();
+  if (corridasPorCampus.size === 0) return null;
+
+  // Combinamos problemas de todas las últimas corridas (una por campus)
+  const corridaIds = [...corridasPorCampus.values()].map((c) => c.id);
+  const { data: problemasRaw } = await sb
+    .from("problemas")
+    .select(
+      "id, tipo, severidad, descripcion, referencias, extra, resuelto, nota_resolucion",
+    )
+    .in("corrida_id", corridaIds);
+
+  // Combinamos clases de todas las últimas importaciones (una por campus)
+  const impsPorCampus = await _ultimasImportacionesPorCampus();
+  const importacionIds = [...impsPorCampus.values()].map((i) => i.id);
+  if (importacionIds.length === 0) return null;
 
   const { data: clasesRaw } = await sb
     .from("clases")
     .select(
       `id, catedratico_nombre, codigo, asignatura_nombre, carrera_codigo,
-       alumnos, modalidad, aula_texto, seccion,
+       alumnos, modalidad, aula_texto, seccion, campus_codigo,
        horas_presenciales, horas_asincronicas, horas_totales,
        bloques_horarios (dia, inicio_min, fin_min)`,
     )
-    .eq("importacion_id", importacionId);
+    .in("importacion_id", importacionIds);
 
   const clases = (clasesRaw ?? []) as ClaseRow[];
   const problemas: ProblemaJSON[] = (problemasRaw ?? []).map(
@@ -125,15 +176,32 @@ export async function cargarDashboardDesdeSupabase(): Promise<DashboardData | nu
     clases.map((c) => c.catedratico_nombre).filter(Boolean),
   );
 
+  const resumenAgregado: Record<string, number> = {};
+  for (const c of corridasPorCampus.values()) {
+    if (!c.resumen) continue;
+    for (const [k, v] of Object.entries(c.resumen)) {
+      resumenAgregado[k] = (resumenAgregado[k] ?? 0) + v;
+    }
+  }
+
+  const generadoAt =
+    [...corridasPorCampus.values()]
+      .map((c) => c.created_at)
+      .sort()
+      .at(-1) ?? new Date().toISOString();
+
   return {
-    generado_at: corrida.created_at,
+    generado_at: generadoAt,
     totales: {
-      clases: corrida.total_clases ?? clases.length,
+      clases: clases.length,
       catedraticos: catedraticos.size,
-      problemas: corrida.total_problemas ?? problemas.length,
+      problemas: problemas.length,
       aulas: metricas_aulas.length,
     },
-    problemas_por_tipo: corrida.resumen ?? contarPorTipo(problemas),
+    problemas_por_tipo:
+      Object.keys(resumenAgregado).length > 0
+        ? resumenAgregado
+        : contarPorTipo(problemas),
     problemas,
     metricas_aulas,
     metricas_docentes,
@@ -142,7 +210,7 @@ export async function cargarDashboardDesdeSupabase(): Promise<DashboardData | nu
 
 /* ─── Helpers de cálculo (espejo del Python en metricas/) ─── */
 
-const HORAS_JORNADA_SEMANA = (21 - 7) * 6; // 7:00 a 21:00 lun-sáb = 84 h
+const HORAS_JORNADA_SEMANA = (21 - 7) * 6;
 
 function calcularMetricasAulas(clases: ClaseRow[]): MetricaAulaJSON[] {
   const porAula = new Map<
